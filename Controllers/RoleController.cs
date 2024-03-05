@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(roles);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetRoleById(int id)
         {
             var role = _roleModel.GetRoleById(id);
@@ -52,7 +52,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdateRole(int id, [FromBody] string name, [FromBody] bool active)
         {
             if (id <= 0)
@@ -75,7 +75,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeleteRole(int id)
         {
             if (id <= 0)

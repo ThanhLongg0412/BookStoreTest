@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(permissions);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetPermissionById(int id)
         {
             var permission = _permissionModel.GetPermissionById(id);
@@ -52,7 +52,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdatePermission(int id, [FromBody] string name, [FromBody] bool active)
         {
             if (id <= 0)
@@ -75,7 +75,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeletePermission(int id)
         {
             if (id <= 0)

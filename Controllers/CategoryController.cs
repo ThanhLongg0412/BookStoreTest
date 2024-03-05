@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetCategoryById(int id)
         {
             if (id <= 0)
@@ -57,7 +57,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdateCategory(int id, [FromBody] string name, [FromBody] int? parent_id)
         {
             if (id <= 0)
@@ -80,7 +80,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeleteCategory(int id)
         {
             if (id <= 0)

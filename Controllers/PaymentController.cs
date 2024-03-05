@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(paymentMethods);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetPaymentMethodById(int id)
         {
             if (id <= 0)
@@ -57,7 +57,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdatePaymentMethod(int id, [FromBody] string name)
         {
             if (id <= 0)
@@ -80,7 +80,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeletePaymentMethod(int id)
         {
             if (id <= 0)

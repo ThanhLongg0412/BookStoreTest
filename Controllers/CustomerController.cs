@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(customers);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetCustomerById(int id)
         {
             if (id <= 0)
@@ -80,7 +80,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] string username, 
             [FromBody] string password, [FromBody] string email, [FromBody] string full_name, 
             [FromBody] string phone_number, [FromBody] string address)
@@ -126,7 +126,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeleteCustomer(int id)
         {
             if (id <= 0)

@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(admins);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetAdminById(int id)
         {
             if (id <= 0)
@@ -78,7 +78,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdateAdmin(int id, [FromBody] string username, 
             [FromBody] string password, [FromBody] string email, [FromBody] string full_name,
             [FromBody] int role_id)
@@ -123,7 +123,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeleteAdmin(int id)
         {
             if (id <= 0)

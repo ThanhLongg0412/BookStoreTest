@@ -21,7 +21,7 @@ namespace BookStore.Controllers
             return Ok(books);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("id={id}")]
         public IActionResult GetBookById(int id)
         {
             if (id <= 0)
@@ -55,7 +55,7 @@ namespace BookStore.Controllers
                 return BadRequest("Book name is required.");
             }
 
-            if (string.IsNullOrEmpty(price))
+            if (price < 0)
             {
                 return BadRequest("Book price is required.");
             }
@@ -91,7 +91,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id={id}")]
         public IActionResult UpdateBook(int id, [FromBody] string isbn, [FromBody] string name,
             [FromBody] decimal price, [FromBody] string description, [FromBody] string? image_url,
             [FromBody] DateTime publish_year, [FromBody] string publisher, [FromBody] string author,
@@ -107,7 +107,7 @@ namespace BookStore.Controllers
                 return BadRequest("Book name is required.");
             }
 
-            if (string.IsNullOrEmpty(price))
+            if (price < 0)
             {
                 return BadRequest("Book price is required.");
             }
@@ -143,7 +143,7 @@ namespace BookStore.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("id={id}")]
         public IActionResult DeleteBook(int id)
         {
             if (id <= 0)
