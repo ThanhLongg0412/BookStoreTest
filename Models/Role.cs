@@ -1,7 +1,4 @@
-﻿using BookStore.Models;
-using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 
 namespace BookStore.Models
 {

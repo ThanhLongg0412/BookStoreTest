@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
-using System.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using BookStore.Models;
 
 namespace BookStore.Controllers
 {
@@ -9,194 +7,90 @@ namespace BookStore.Controllers
     [ApiController]
     public class PermissionController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly PermissionModel _permissionModel;
 
         public PermissionController(IConfiguration configuration)
         {
-            _configuration = configuration;
-        }
-
-        private SqlConnection GetSqlConnection()
-        {
-            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
-        }
-
-        private DataTable ExecuteQuery(string query, SqlParameter[] parameters)
-        {
-            DataTable table = new DataTable();
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        table.Load(reader);
-                    }
-                }
-            }
-            return table;
+            _permissionModel = new PermissionModel(configuration);
         }
 
         [HttpGet]
-        [Route("GetPermission")]
-        public ActionResult GetPermission()
+        public IActionResult GetAllPermissions()
         {
-            try
-            {
-                string query = "SELECT * FROM permissions";
-                DataTable table = ExecuteQuery(query, null);
-                return new JsonResult(table);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+            var permissions = _permissionModel.GetAllRoles();
+            return Ok(permissions);
         }
 
-        [HttpGet]
-        [Route("GetPermissionById")]
-        public ActionResult GetPermissionById(int id)
+        [HttpGet("{id}")]
+        public IActionResult GetPermissionById(int id)
         {
-            try
+            var permission = _permissionModel.GetPermissionById(id);
+
+            if (permission == null)
             {
-                string query = "SELECT * FROM permissions WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                DataTable table = ExecuteQuery(query, parameters);
-                return new JsonResult(table);
+                return NotFound("Role not found.");
             }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+
+            return Ok(permission);
         }
 
         [HttpPost]
-        [Route("AddPermission")]
-        public ActionResult AddPermission([FromForm] string name, [FromForm] bool active)
+        public IActionResult AddPermission([FromBody] string name)
         {
-            try
+            if (string.IsNullOrEmpty(name))
             {
-                // Kiểm tra trùng lặp tên quyền
-                if (IsDuplicatePermissionName(name))
-                {
-                    return BadRequest("Permission name already exists!");
-                }
-
-                string query = "INSERT INTO permissions VALUES (@name, @active)";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@active", active)
-                };
-                ExecuteQuery(query, parameters);
-                return new JsonResult("Add Successfully");
+                return BadRequest("Permission name is required.");
             }
-            catch (Exception ex)
+
+            if (_permissionModel.AddPermission(name))
             {
-                return BadRequest("Error: " + ex.Message);
+                return Ok("Permission added successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to add permission.");
             }
         }
 
-        [HttpPut]
-        [Route("UpdatePermission")]
-        public IActionResult UpdateRole(int id, [FromForm] string name, [FromForm] bool active)
+        [HttpPut("{id}")]
+        public IActionResult UpdatePermission(int id, [FromBody] string name, [FromBody] bool active)
         {
-            try
+            if (id <= 0)
             {
-                if (string.IsNullOrEmpty(name) || id <= 0)
-                {
-                    return BadRequest("Invalid permission ID or name!");
-                }
-
-                // Kiểm tra trùng lặp tên quyền
-                if (IsDuplicatePermissionName(name))
-                {
-                    return BadRequest("Permission name already exists!");
-                }
-
-                string query = "UPDATE permissions SET name = @name, active = @active WHERE id = @id";
-
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@active", active),
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-
-                return new JsonResult("Updated Successfully");
+                return BadRequest("Invalid permission ID.");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(name))
             {
-                return BadRequest("Error: " + ex.Message);
+                return BadRequest("Permission name is required.");
+            }
+
+            if (_permissionModel.UpdatePermission(id, name, active))
+            {
+                return Ok("Permission updated successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to update permission.");
             }
         }
 
-        [HttpDelete]
-        [Route("DeletePermission")]
-        public ActionResult DeletePermisson(int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeletePermission(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "DELETE FROM permissons WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                ExecuteQuery(query, parameters);
-                return new JsonResult("Delete Successfully");
+                return BadRequest("Invalid permission ID.");
             }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
-        }
 
-        private void ExecuteNonQuery(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
+            if (_permissionModel.DeletePermission(id))
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                return Ok("Permission deleted successfully.");
             }
-        }
-
-        private T ExecuteScalar<T>(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
+            else
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    object result = command.ExecuteScalar();
-                    return (T)Convert.ChangeType(result, typeof(T));
-                }
+                return BadRequest("Failed to delete permission.");
             }
-        }
-
-        private bool IsDuplicatePermissionName(string name)
-        {
-            string query = "SELECT COUNT(*) FROM permissions WHERE name = @name";
-            SqlParameter[] parameters = {
-                new SqlParameter("@name", name)
-            };
-            int count = Convert.ToInt32(ExecuteScalar<int>(query, parameters));
-            return count > 0;
         }
     }
 }
