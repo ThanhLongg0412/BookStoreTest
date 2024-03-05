@@ -1,165 +1,161 @@
-﻿using BookStore.Models;
+﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace bookstore.Models;
-
-public class PaymentMethod
+namespace BookStore.Models
 {
-    public int Id { get; set; }
-
-    public string Name { get; set; }
-}
-
-public class PaymentModel
-{
-    private string connectionString; // Chuỗi kết nối đến cơ sở dữ liệu
-
-    public PaymentModel(string connectionString)
+    public class PaymentMethod
     {
-        this.connectionString = connectionString;
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 
-    // Phương thức để lấy tất cả các phương thức thanh toán từ cơ sở dữ liệu
-    public List<PaymentMethod> GetAllPaymentMethods()
+    public class PaymentModel
     {
-        List<PaymentMethod> paymentMethods = new List<PaymentMethod>();
+        private readonly IConfiguration _configuration;
 
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        public PaymentModel(IConfiguration configuration)
         {
-            string query = "SELECT id, name FROM payment_methods";
-            SqlCommand command = new SqlCommand(query, connection);
+            _configuration = configuration;
+        }
 
-            try
+        private SqlConnection GetSqlConnection()
+        {
+            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
+        }
+
+        public List<PaymentMethod> GetAllPaymentMethods()
+        {
+            List<PaymentMethod> paymentMethods = new List<PaymentMethod>();
+
+            using (SqlConnection connection = GetSqlConnection())
             {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                string query = "SELECT id, name FROM payment_methods";
+                SqlCommand command = new SqlCommand(query, connection);
+
+                try
                 {
-                    PaymentMethod paymentMethod = new PaymentMethod
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
                     {
-                        Id = Convert.ToInt32(reader["id"]),
-                        Name = reader["name"].ToString()
-                    };
-                    paymentMethods.Add(paymentMethod);
+                        PaymentMethod paymentMethod = new PaymentMethod
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString()
+                        };
+                        paymentMethods.Add(paymentMethod);
+                    }
+                    reader.Close();
                 }
-                reader.Close();
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có
-                Console.WriteLine("Error: " + ex.Message);
-            }
-        }
-
-        return paymentMethods;
-    }
-
-    public PaymentMethod GetPaymentMethodById(int id)
-    {
-        PaymentMethod paymentMethod = null;
-
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            string query = "SELECT id, name FROM payment_methods WHERE id = @id";
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@id", id);
-
-            try
-            {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.Read())
+                catch (Exception ex)
                 {
-                    paymentMethod = new PaymentMethod
-                    {
-                        Id = Convert.ToInt32(reader["id"]),
-                        Name = reader["name"].ToString()
-                    };
+                    Console.WriteLine("Error: " + ex.Message);
                 }
-                reader.Close();
             }
-            catch (Exception ex)
+
+            return paymentMethods;
+        }
+
+        public PaymentMethod GetPaymentMethodById(int id)
+        {
+            PaymentMethod paymentMethod = null;
+
+            using (SqlConnection connection = GetSqlConnection())
             {
-                // Xử lý ngoại lệ nếu có
-                Console.WriteLine("Error: " + ex.Message);
+                string query = "SELECT id, name FROM payment_methods WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        paymentMethod = new PaymentMethod
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString()
+                        };
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return paymentMethod;
+        }
+
+        public bool AddPaymentMethod(string paymentMethodName)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "INSERT INTO payment_methods (name) VALUES (@name)";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", paymentMethodName);
+
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
             }
         }
 
-        return paymentMethod;
-    }
-
-    // Phương thức để thêm một phương thức thanh toán mới vào cơ sở dữ liệu
-    public bool AddPaymentMethod(PaymentMethod paymentMethod)
-    {
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        public bool UpdatePaymentMethod(int id, string paymentMethodName)
         {
-            string query = "INSERT INTO payment_methods (name) VALUES (@name)";
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@name", paymentMethod.Name);
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "UPDATE payment_methods SET name = @name WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", paymentMethodName);
+                command.Parameters.AddWithValue("@id", id);
 
-            try
-            {
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có
-                Console.WriteLine("Error: " + ex.Message);
-                return false;
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
             }
         }
-    }
 
-    // Phương thức để cập nhật thông tin của một phương thức thanh toán trong cơ sở dữ liệu
-    public bool UpdatePaymentMethod(PaymentMethod paymentMethod)
-    {
-        using (SqlConnection connection = new SqlConnection(connectionString))
+        public bool DeletePaymentMethod(int id)
         {
-            string query = "UPDATE payment_methods SET name = @name WHERE id = @id";
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@name", paymentMethod.Name);
-            command.Parameters.AddWithValue("@id", paymentMethod.Id);
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "DELETE FROM payment_methods WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
 
-            try
-            {
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có
-                Console.WriteLine("Error: " + ex.Message);
-                return false;
-            }
-        }
-    }
-
-    // Phương thức để xóa một phương thức thanh toán khỏi cơ sở dữ liệu
-    public bool DeletePaymentMethod(int id)
-    {
-        using (SqlConnection connection = new SqlConnection(connectionString))
-        {
-            string query = "DELETE FROM payment_methods WHERE id = @id";
-            SqlCommand command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@id", id);
-
-            try
-            {
-                connection.Open();
-                int rowsAffected = command.ExecuteNonQuery();
-                return rowsAffected > 0;
-            }
-            catch (Exception ex)
-            {
-                // Xử lý ngoại lệ nếu có
-                Console.WriteLine("Error: " + ex.Message);
-                return false;
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
             }
         }
     }
