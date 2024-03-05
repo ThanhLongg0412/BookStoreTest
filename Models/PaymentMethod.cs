@@ -1,7 +1,5 @@
 ﻿using System.Data.SqlClient;
 
-//test up
-
 namespace BookStore.Models
 {
     public class PaymentMethod

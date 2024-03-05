@@ -46,7 +46,7 @@ namespace BookStore.Controllers
         {
             if (string.IsNullOrEmpty(username))
             {
-                return BadRequest("Payment method name is required.");
+                return BadRequest("Customer username is required.");
             }
 
             if (string.IsNullOrEmpty(password))

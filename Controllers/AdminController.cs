@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using System.Data.SqlClient;
 
 namespace BookStore.Controllers
 {
@@ -9,188 +7,138 @@ namespace BookStore.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly AdminModel _adminModel;
 
         public AdminController(IConfiguration configuration)
         {
-            _configuration = configuration;
-        }
-
-        private SqlConnection GetSqlConnection()
-        {
-            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
-        }
-
-        private DataTable ExecuteQuery(string query, SqlParameter[] parameters)
-        {
-            DataTable table = new DataTable();
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        table.Load(reader);
-                    }
-                }
-            }
-            return table;
+            _adminModel = new AdminModel(configuration);
         }
 
         [HttpGet]
-        [Route("GetAdmin")]
-        public ActionResult GetAdmin()
+        public IActionResult GetAllAdmins()
         {
-            try
-            {
-                string query = "SELECT * FROM admins";
-                DataTable table = ExecuteQuery(query, null);
-                return new JsonResult(table);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+            var admins = _adminModel.GetAllAdmins();
+            return Ok(admins);
         }
 
-        [HttpGet]
-        [Route("GetAdminById")]
-        public ActionResult GetAdminById(int id)
+        [HttpGet("{id}")]
+        public IActionResult GetAdminById(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "SELECT * FROM admins WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                DataTable table = ExecuteQuery(query, parameters);
-                return new JsonResult(table);
+                return BadRequest("Invalid admin ID.");
             }
-            catch (Exception ex)
+
+            var admin = _adminModel.GetAdminById(id);
+
+            if (admin == null)
             {
-                return BadRequest("Error: " + ex.Message);
+                return NotFound("Admin not found.");
             }
+
+            return Ok(admin);
         }
 
         [HttpPost]
-        [Route("AddAdmin")]
-        public ActionResult AddAdmin([FromForm] string username, [FromForm] string password,
-            [FromForm] string email, [FromForm] string fullname, [FromForm] int role_id)
+        public IActionResult AddAdmin([FromBody] string username, [FromBody] string password,
+            [FromBody] string email, [FromBody] string full_name, [FromBody] int role_id)
         {
-            try
+            if (string.IsNullOrEmpty(username))
             {
-                
-
-                string query = "INSERT INTO admins VALUES " +
-                    "(@username, @password, @email, @full_name, @role_id)";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@username", username),
-                    new SqlParameter("@password", password),
-                    new SqlParameter("@email", email),
-                    new SqlParameter("@full_name", fullname)
-                };
-                ExecuteQuery(query, parameters);
-                return new JsonResult("Add Successfully");
+                return BadRequest("Admin username is required.");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(password))
             {
-                return BadRequest("Error: " + ex.Message);
+                return BadRequest("Admin password is required.");
+            }
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Admin email is required.");
+            }
+
+            if (string.IsNullOrEmpty(full_name))
+            {
+                return BadRequest("Admin full name is required.");
+            }
+
+            if (role_id == 0)
+            {
+                return BadRequest("Admin role id is required.");
+            }
+
+            if (_adminModel.AddAdmin(username, password, email, full_name, role_id))
+            {
+                return Ok("Admin added successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to add Admin.");
             }
         }
 
-        [HttpPut]
-        [Route("UpdateAdmin")]
-        public IActionResult UpdateAdmin(int id, [FromForm] string username,
-            [FromForm] string password, [FromForm] string email, [FromForm] string fullname,
-            [FromForm] int role_id)
+        [HttpPut("{id}")]
+        public IActionResult UpdateAdmin(int id, [FromBody] string username, 
+            [FromBody] string password, [FromBody] string email, [FromBody] string full_name,
+            [FromBody] int role_id)
         {
-            try
+            if (id <= 0)
             {
-                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) ||
-                    string.IsNullOrEmpty(email) || string.IsNullOrEmpty(fullname) || id <= 0)
-                {
-                    return BadRequest("Invalid ID or information entered!");
-                }
-
-                string query = "UPDATE admins SET username = @username, " +
-                    "password = @password, email = @email, full_name = @full_name, " +
-                    "role_id = @role_id WHERE id = @id";
-
-                SqlParameter[] parameters = {
-                    new SqlParameter("@username", username),
-                    new SqlParameter("@password", password),
-                    new SqlParameter("@email", email),
-                    new SqlParameter("@full_name", fullname),
-                    new SqlParameter("@role_id", role_id),
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-
-                return new JsonResult("Updated Successfully");
+                return BadRequest("Invalid admin ID.");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(username))
             {
-                return BadRequest("Lỗi: " + ex.Message);
+                return BadRequest("Admin username is required.");
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                return BadRequest("Admin password is required.");
+            }
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Admin email is required.");
+            }
+
+            if (string.IsNullOrEmpty(full_name))
+            {
+                return BadRequest("Admin full name is required.");
+            }
+
+            if (role_id == 0)
+            {
+                return BadRequest("Admin role id is required.");
+            }
+
+            if (_adminModel.UpdateAdmin(id, username, password, email, full_name, role_id))
+            {
+                return Ok("Admin updated successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to update admin.");
             }
         }
 
-        [HttpDelete]
-        [Route("DeleteCustomer")]
-        public ActionResult DeleteCustomer(int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteAdmin(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "DELETE FROM customers WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                ExecuteQuery(query, parameters);
-                return new JsonResult("Delete Successfully");
+                return BadRequest("Invalid admin ID.");
             }
-            catch (Exception ex)
+
+            if (_adminModel.DeleteAdmin(id))
             {
-                return BadRequest("Error: " + ex.Message);
+                return Ok("Admin deleted successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to delete admin.");
             }
         }
-
-        private void ExecuteNonQuery(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private T ExecuteScalar<T>(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    object result = command.ExecuteScalar();
-                    return (T)Convert.ChangeType(result, typeof(T));
-                }
-            }
-        }
-
-        
     }
 }

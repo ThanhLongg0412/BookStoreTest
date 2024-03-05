@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
-using System.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using BookStore.Models;
 
 namespace BookStore.Controllers
 {
@@ -9,212 +7,95 @@ namespace BookStore.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly CategoryModel _categoryModel;
 
         public CategoryController(IConfiguration configuration)
         {
-            _configuration = configuration;
-        }
-
-        private SqlConnection GetSqlConnection()
-        {
-            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
-        }
-
-        private DataTable ExecuteQuery(string query, SqlParameter[] parameters)
-        {
-            DataTable table = new DataTable();
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        table.Load(reader);
-                    }
-                }
-            }
-            return table;
+            _categoryModel = new CategoryModel(configuration);
         }
 
         [HttpGet]
-        [Route("GetCategory")]
-        public ActionResult GetCategory()
+        public IActionResult GetAllCategories()
         {
-            try
-            {
-                string query = "SELECT * FROM categories";
-                DataTable table = ExecuteQuery(query, null);
-                return new JsonResult(table);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+            var categories = _categoryModel.GetAllCategories();
+            return Ok(categories);
         }
 
-        [HttpGet]
-        [Route("GetCategoryById")]
-        public ActionResult GetCategoryById(int id)
+        [HttpGet("{id}")]
+        public IActionResult GetCategoryById(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "SELECT * FROM categories WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                DataTable table = ExecuteQuery(query, parameters);
-                return new JsonResult(table);
+                return BadRequest("Invalid category ID.");
             }
-            catch (Exception ex)
+
+            var category = _categoryModel.GetCategoryById(id);
+
+            if (category == null)
             {
-                return BadRequest("Error: " + ex.Message);
+                return NotFound("Category not found.");
             }
+
+            return Ok(category);
         }
 
         [HttpPost]
-        [Route("AddCategory")]
-        public ActionResult AddCategory([FromForm] string name, [FromForm] int? parent_id)
+        public IActionResult AddCategory([FromBody] string name, [FromBody] int? parent_id)
         {
-            try
+            if (string.IsNullOrEmpty(name))
             {
-                // Kiểm tra tính hợp lệ của parent_id
-                if (parent_id != null && !IsParentCategoryExists(parent_id.Value))
-                {
-                    return BadRequest("Parent category does not exist!");
-                }
-
-                // Kiểm tra trùng lặp category name
-                if (IsDuplicateCategoryName(name))
-                {
-                    return BadRequest("Category name already exists!");
-                }
-
-                // Nếu parent_id hợp lệ, thêm mới Category
-                string query = "INSERT INTO categories VALUES (@name, @parent_id)";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@parent_id", (object)parent_id ?? DBNull.Value)
-                };
-                ExecuteNonQuery(query, parameters);
-
-                return new JsonResult("Add Successfully");
+                return BadRequest("Category name is required.");
             }
-            catch (Exception ex)
+
+            if (_categoryModel.AddCategory(name, parent_id))
             {
-                return BadRequest("Error: " + ex.Message);
+                return Ok("Category added successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to add category.");
             }
         }
 
-        [HttpPut]
-        [Route("UpdateCategory")]
-        public IActionResult UpdateCategory(int id, [FromForm] string name, [FromForm] int parent_id)
+        [HttpPut("{id}")]
+        public IActionResult UpdateCategory(int id, [FromBody] string name, [FromBody] int? parent_id)
         {
-            try
+            if (id <= 0)
             {
-                if (string.IsNullOrEmpty(name) || id <= 0)
-                {
-                    return BadRequest("Invalid category ID or name!");
-                }
-
-                // Kiểm tra trùng lặp tên danh mục
-                if (IsDuplicateCategoryName(name))
-                {
-                    return BadRequest("Category name already exists!");
-                }
-
-                string query = "UPDATE categories SET name = @name, parent_id = @parent_id WHERE id = @id";
-
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@parent_id", parent_id),
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-
-                return new JsonResult("Updated Successfully");
+                return BadRequest("Invalid category ID.");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(name))
             {
-                return BadRequest("Error: " + ex.Message);
+                return BadRequest("Category name is required.");
+            }
+
+            if (_categoryModel.UpdateCategory(id, name, parent_id))
+            {
+                return Ok("Category updated successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to update category.");
             }
         }
 
-        [HttpDelete]
-        [Route("DeleteCategory")]
-        public ActionResult DeleteCategory(int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteCategory(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "DELETE FROM categories WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-                return new JsonResult("Delete Successfully");
+                return BadRequest("Invalid category ID.");
             }
-            catch (Exception ex)
+
+            if (_categoryModel.DeleteCategory(id))
             {
-                return BadRequest("Error: " + ex.Message);
+                return Ok("Category deleted successfully.");
             }
-        }
-
-        private void ExecuteNonQuery(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
+            else
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                return BadRequest("Failed to delete category.");
             }
-        }
-
-        private T ExecuteScalar<T>(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    object result = command.ExecuteScalar();
-                    return (T)Convert.ChangeType(result, typeof(T));
-                }
-            }
-        }
-
-        private bool IsParentCategoryExists(int parent_id)
-        {
-            string query = "SELECT COUNT(*) FROM categories WHERE id = @parent_id";
-            SqlParameter[] parameter = {
-                new SqlParameter("@parent_id", parent_id)
-            };
-            int count = Convert.ToInt32(ExecuteScalar<int>(query, parameter));
-            return count > 0;
-        }
-
-        private bool IsDuplicateCategoryName(string name)
-        {
-            string query = "SELECT COUNT(*) FROM categories WHERE name = @name";
-            SqlParameter[] parameters = {
-                new SqlParameter("@name", name)
-            };
-            int count = Convert.ToInt32(ExecuteScalar<int>(query, parameters));
-            return count > 0;
         }
     }
 }

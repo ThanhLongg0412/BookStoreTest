@@ -56,7 +56,7 @@ namespace BookStore.Models
                             Password = reader["password"].ToString(),
                             Email = reader["email"].ToString(),
                             FullName = reader["full_name"].ToString(),
-                            PhoneNumber = reader["phone_number"].ToString(),
+                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
                             Address = reader["address"].ToString()
                         };
                         customers.Add(customer);
@@ -116,7 +116,8 @@ namespace BookStore.Models
         {
             if (IsCustomerExists(username, email, phone_number))
             {
-                Console.WriteLine("Error: Customer with the same name already exists.");
+                Console.WriteLine("Error: Customer with the same username or email or " +
+                    "phone_number already exists.");
                 return false;
             }
 
@@ -130,7 +131,7 @@ namespace BookStore.Models
                 command.Parameters.AddWithValue("@password", password);
                 command.Parameters.AddWithValue("@email", email);
                 command.Parameters.AddWithValue("@full_name", full_name);
-                command.Parameters.AddWithValue("@phone_number", phone_number);
+                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(phone_number) ? DBNull.Value : (object)phone_number);
                 command.Parameters.AddWithValue("@address", address);
 
                 try
@@ -152,7 +153,8 @@ namespace BookStore.Models
         {
             if (IsCustomerExists(username, email, phone_number))
             {
-                Console.WriteLine("Error: Customer with the same name already exists.");
+                Console.WriteLine("Error: Customer with the same username or email or " +
+                    "phone_number already exists.");
                 return false;
             }
 

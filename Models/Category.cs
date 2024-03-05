@@ -1,19 +1,200 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Data.SqlClient;
 
-namespace BookStore.Models;
-
-public partial class Category
+namespace BookStore.Models
 {
-    public int Id { get; set; }
+    public class Category
+    {
+        public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+        public string Name { get; set; }
 
-    public int? ParentId { get; set; }
+        public int? ParentId { get; set; }
+    }
 
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public class CategoryModel
+    {
+        private readonly IConfiguration _configuration;
 
-    public virtual ICollection<Category> InverseParent { get; set; } = new List<Category>();
+        public CategoryModel(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
 
-    public virtual Category? Parent { get; set; }
+        private SqlConnection GetSqlConnection()
+        {
+            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
+        }
+
+        public List<Category> GetAllCategories()
+        {
+            List<Category> categories = new List<Category>();
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, name, parent_id FROM categories";
+                SqlCommand command = new SqlCommand(query, connection);
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Category category = new Category
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString(),
+                            ParentId = reader["parent_id"] is DBNull ? null : (int?)reader["parent_id"]
+                        };
+                        categories.Add(category);
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return categories;
+        }
+
+        public Category GetCategoryById(int id)
+        {
+            Category category = null;
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, name, parent_id FROM categories WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        category = new Category
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString(),
+                            ParentId = reader["parent_id"] is DBNull ? null : (int?)reader["parent_id"]
+                        };
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return category;
+        }
+
+        public bool AddCategory(string name, int? parent_id)
+        {
+            if (IsCategoryExists(name))
+            {
+                Console.WriteLine("Error: Category with the same name already exists.");
+                return false;
+            }
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "INSERT INTO categories (name, parent_id) VALUES (@name, @parent_id)";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@parent_id", parent_id ?? (object)DBNull.Value);
+
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool UpdateCategory(int id, string name, int? parent_id)
+        {
+            if (IsCategoryExists(name))
+            {
+                Console.WriteLine("Error: Category with the same name already exists.");
+                return false;
+            }
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "UPDATE categories SET name = @name, parent_id = @parent_id " +
+                    "WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@parent_id", parent_id ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool DeleteCategory(int id)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "DELETE FROM categories WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsCategoryExists(string name)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT COUNT(*) FROM categories WHERE name = @name";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", name);
+
+                try
+                {
+                    connection.Open();
+                    int count = (int)command.ExecuteScalar();
+                    return count > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+    }
 }
