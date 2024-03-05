@@ -106,12 +106,18 @@ namespace BookStore.Models
             return admin;
         }
 
-        public bool AddAdmin(string username, string password, string email,
-            string full_name, int role_id)
+        public bool AddAdmin(string username, string password, string email, string full_name, 
+            int role_id)
         {
             if (IsAdminExists(username, email))
             {
                 Console.WriteLine("Error: Admin with the same username or email already exists.");
+                return false;
+            }
+
+            if (!IsRoleIdExists(role_id))
+            {
+                Console.WriteLine("Error: Role with the provided role_id does not exist.");
                 return false;
             }
 
@@ -146,6 +152,12 @@ namespace BookStore.Models
             if (IsAdminExists(username, email))
             {
                 Console.WriteLine("Error: Admin with the same username or email already exists.");
+                return false;
+            }
+
+            if (!IsRoleIdExists(role_id))
+            {
+                Console.WriteLine("Error: Role with the provided role_id does not exist.");
                 return false;
             }
 
@@ -201,11 +213,33 @@ namespace BookStore.Models
         {
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT COUNT(*) FROM admins WHERE username = @username OR " +
+                string query = "SELECT COUNT(*) FROM admins WHERE username = @username AND " +
                     "email = @email";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@email", email);
+
+                try
+                {
+                    connection.Open();
+                    int count = (int)command.ExecuteScalar();
+                    return count > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsRoleIdExists(int role_id)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT COUNT(*) FROM roles WHERE id = @role_id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@role_id", role_id);
 
                 try
                 {

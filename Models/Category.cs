@@ -95,9 +95,15 @@ namespace BookStore.Models
 
         public bool AddCategory(string name, int? parent_id)
         {
-            if (IsCategoryExists(name))
+            if (IsCategoryNameExists(name))
             {
                 Console.WriteLine("Error: Category with the same name already exists.");
+                return false;
+            }
+
+            if (parent_id.HasValue && !IsParentIdExists(parent_id.Value))
+            {
+                Console.WriteLine("Error: Parent category does not exist.");
                 return false;
             }
 
@@ -124,9 +130,15 @@ namespace BookStore.Models
 
         public bool UpdateCategory(int id, string name, int? parent_id)
         {
-            if (IsCategoryExists(name))
+            if (IsCategoryNameExists(name))
             {
                 Console.WriteLine("Error: Category with the same name already exists.");
+                return false;
+            }
+
+            if (parent_id.HasValue && !IsParentIdExists(parent_id.Value))
+            {
+                Console.WriteLine("Error: Parent category does not exist.");
                 return false;
             }
 
@@ -175,13 +187,35 @@ namespace BookStore.Models
             }
         }
 
-        public bool IsCategoryExists(string name)
+        public bool IsCategoryNameExists(string name)
         {
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "SELECT COUNT(*) FROM categories WHERE name = @name";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@name", name);
+
+                try
+                {
+                    connection.Open();
+                    int count = (int)command.ExecuteScalar();
+                    return count > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsParentIdExists(int? parent_id)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT COUNT(*) FROM categories WHERE parent_id = @parent_id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@parent_id", parent_id ?? (object)DBNull.Value);
 
                 try
                 {
