@@ -92,13 +92,19 @@ namespace BookStore.Models
             return paymentMethod;
         }
 
-        public bool AddPaymentMethod(string paymentMethodName)
+        public bool AddPaymentMethod(string name)
         {
+            if (IsPaymentMethodExists(name))
+            {
+                Console.WriteLine("Error: Payment method with the same name already exists.");
+                return false;
+            }
+
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "INSERT INTO payment_methods (name) VALUES (@name)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", paymentMethodName);
+                command.Parameters.AddWithValue("@name", name);
 
                 try
                 {
@@ -114,13 +120,19 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdatePaymentMethod(int id, string paymentMethodName)
+        public bool UpdatePaymentMethod(int id, string name)
         {
+            if (IsPaymentMethodExists(name))
+            {
+                Console.WriteLine("Error: Payment method with the same name already exists.");
+                return false;
+            }
+
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "UPDATE payment_methods SET name = @name WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", paymentMethodName);
+                command.Parameters.AddWithValue("@name", name);
                 command.Parameters.AddWithValue("@id", id);
 
                 try
@@ -150,6 +162,28 @@ namespace BookStore.Models
                     connection.Open();
                     int rowsAffected = command.ExecuteNonQuery();
                     return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        public bool IsPaymentMethodExists(string name)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT COUNT(*) FROM payment_methods WHERE name = @name";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@name", name);
+
+                try
+                {
+                    connection.Open();
+                    int count = (int)command.ExecuteScalar();
+                    return count > 0;
                 }
                 catch (Exception ex)
                 {

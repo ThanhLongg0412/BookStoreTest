@@ -42,14 +42,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddPaymentMethod([FromBody] string paymentMethodName)
+        public IActionResult AddPaymentMethod([FromBody] string name)
         {
-            if (string.IsNullOrEmpty(paymentMethodName))
+            if (string.IsNullOrEmpty(name))
             {
                 return BadRequest("Payment method name is required.");
             }
 
-            if (_paymentModel.AddPaymentMethod(paymentMethodName))
+            if (_paymentModel.AddPaymentMethod(name))
             {
                 return Ok("Payment method added successfully.");
             }
@@ -60,19 +60,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdatePaymentMethod(int id, [FromBody] string paymentMethodName)
+        public IActionResult UpdatePaymentMethod(int id, [FromBody] string name)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid payment method ID.");
             }
 
-            if (string.IsNullOrEmpty(paymentMethodName))
+            if (string.IsNullOrEmpty(name))
             {
                 return BadRequest("Payment method name is required.");
             }
 
-            if (_paymentModel.UpdatePaymentMethod(id, paymentMethodName))
+            if (_paymentModel.UpdatePaymentMethod(id, name))
             {
                 return Ok("Payment method updated successfully.");
             }

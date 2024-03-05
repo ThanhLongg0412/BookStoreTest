@@ -1,4 +1,4 @@
-﻿using bookstore.Models;
+﻿using BookStore.Models;
 
 namespace BookStore.Models
 {

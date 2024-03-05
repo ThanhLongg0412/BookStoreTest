@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BookStore.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
-using System.Data;
+using System;
 
 namespace BookStore.Controllers
 {
@@ -9,194 +8,90 @@ namespace BookStore.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly RoleModel _roleModel;
 
         public RoleController(IConfiguration configuration)
         {
-            _configuration = configuration;
-        }
-
-        private SqlConnection GetSqlConnection()
-        {
-            return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
-        }
-
-        private DataTable ExecuteQuery(string query, SqlParameter[] parameters)
-        {
-            DataTable table = new DataTable();
-            using (SqlConnection connection = GetSqlConnection())
-            {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        table.Load(reader);
-                    }
-                }
-            }
-            return table;
+            _roleModel = new RoleModel(configuration);
         }
 
         [HttpGet]
-        [Route("GetRole")]
-        public ActionResult GetRole()
+        public IActionResult GetAllRoles()
         {
-            try
-            {
-                string query = "SELECT * FROM roles";
-                DataTable table = ExecuteQuery(query, null);
-                return new JsonResult(table);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+            var roles = _roleModel.GetAllRoles();
+            return Ok(roles);
         }
 
-        [HttpGet]
-        [Route("GetRoleById")]
-        public ActionResult GetRoleById(int id)
+        [HttpGet("{id}")]
+        public IActionResult GetRoleById(int id)
         {
-            try
+            var role = _roleModel.GetRoleById(id);
+
+            if (role == null)
             {
-                string query = "SELECT * FROM roles WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                DataTable table = ExecuteQuery(query, parameters);
-                return new JsonResult(table);
+                return NotFound("Role not found.");
             }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
+
+            return Ok(role);
         }
 
         [HttpPost]
-        [Route("AddRole")]
-        public ActionResult AddRole([FromForm] string name, [FromForm] bool active)
+        public IActionResult AddRole([FromBody] string name)
         {
-            try
+            if (string.IsNullOrEmpty(name))
             {
-                // Kiểm tra trùng lặp tên vai trò
-                if (IsDuplicateRoleName(name))
-                {
-                    return BadRequest("Role name already exists!");
-                }
-
-                string query = "INSERT INTO roles VALUES (@name, @active)";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@active", active)
-                };
-                ExecuteNonQuery(query, parameters);
-                return new JsonResult("Add Successfully");
+                return BadRequest("Role name is required.");
             }
-            catch (Exception ex)
+
+            if (_roleModel.AddRole(name))
             {
-                return BadRequest("Error: " + ex.Message);
+                return Ok("Role added successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to add role.");
             }
         }
 
-        [HttpPut]
-        [Route("UpdateRole")]
-        public IActionResult UpdateRole(int id, [FromForm] string name, [FromForm] bool active)
+        [HttpPut("{id}")]
+        public IActionResult UpdateRole(int id, [FromBody] string name, [FromBody] bool active)
         {
-            try
+            if (id <= 0)
             {
-                if (string.IsNullOrEmpty(name) || id <= 0)
-                {
-                    return BadRequest("Invalid role ID or name!");
-                }
-
-                // Kiểm tra trùng lặp tên vai trò
-                if (IsDuplicateRoleName(name))
-                {
-                    return BadRequest("Role name already exists!");
-                }
-
-                string query = "UPDATE roles SET name = @name, active = @active WHERE id = @id";
-
-                SqlParameter[] parameters = {
-                    new SqlParameter("@name", name),
-                    new SqlParameter("@active", active),
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-
-                return new JsonResult("Updated Successfully");
+                return BadRequest("Invalid role ID.");
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrEmpty(name))
             {
-                return BadRequest("Error: " + ex.Message);
+                return BadRequest("Role name is required.");
+            }
+
+            if (_roleModel.UpdateRole(id, name, active))
+            {
+                return Ok("Role updated successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to update role.");
             }
         }
 
-        [HttpDelete]
-        [Route("DeleteRole")]
-        public ActionResult DeleteRole(int id)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteRole(int id)
         {
-            try
+            if (id <= 0)
             {
-                string query = "DELETE FROM roles WHERE id = @id";
-                SqlParameter[] parameters = {
-                    new SqlParameter("@id", id)
-                };
-                ExecuteNonQuery(query, parameters);
-                return new JsonResult("Delete Successfully");
+                return BadRequest("Invalid role ID.");
             }
-            catch (Exception ex)
-            {
-                return BadRequest("Error: " + ex.Message);
-            }
-        }
 
-        private void ExecuteNonQuery(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
+            if (_roleModel.DeleteRole(id))
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    command.ExecuteNonQuery();
-                }
+                return Ok("Role deleted successfully.");
             }
-        }
-
-        private T ExecuteScalar<T>(string query, SqlParameter[] parameters)
-        {
-            using (SqlConnection connection = GetSqlConnection())
+            else
             {
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    if (parameters != null)
-                    {
-                        command.Parameters.AddRange(parameters);
-                    }
-                    connection.Open();
-                    object result = command.ExecuteScalar();
-                    return (T)Convert.ChangeType(result, typeof(T));
-                }
+                return BadRequest("Failed to delete role.");
             }
-        }
-
-        private bool IsDuplicateRoleName(string name)
-        {
-            string query = "SELECT COUNT(*) FROM roles WHERE name = @name";
-            SqlParameter[] parameters = {
-                new SqlParameter("@name", name)
-            };
-            int count = Convert.ToInt32(ExecuteScalar<int>(query, parameters));
-            return count > 0;
         }
     }
 }
