@@ -44,7 +44,6 @@ namespace BookStore.Models
                     {
                         OrderDetail orderDetail = new OrderDetail
                         {
-                            Id = Convert.ToInt32(reader["id"]),
                             OrderId = (int)reader["order_id"],
                             BookId = (int)reader["book_id"],
                             UnitPrice = (decimal)reader["unit_price"],
