@@ -14,7 +14,7 @@ namespace BookStore.Models
 
         public string FullName { get; set; }
 
-        public int? RoleId { get; set; }
+        public int RoleId { get; set; }
     }
 
     public class AdminModel
@@ -146,7 +146,7 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateAdmin(int id, string username, string password, string email,
+        public bool UpdateAdmin(int id, string username, string password, string email, 
             string full_name, int role_id)
         {
             if (IsAdminExists(username, email))

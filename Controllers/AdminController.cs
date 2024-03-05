@@ -74,7 +74,7 @@ namespace BookStore.Controllers
             }
             else
             {
-                return BadRequest("Failed to add Admin.");
+                return BadRequest("Failed to add admin.");
             }
         }
 
