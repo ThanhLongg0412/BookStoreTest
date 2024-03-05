@@ -107,23 +107,22 @@ namespace BookStore.Models
             return order;
         }
 
-        public bool AddOrder(string status, DateTime order_date, int payment_method_id, int admin_id, 
-            int customer_id)
+        public bool AddOrder(Order order)
         {
-            if (!IsPaymentMethodIdExists(payment_method_id))
+            if (!IsPaymentMethodIdExists(order.PaymentMethodId))
             {
                 Console.WriteLine("Error: Payment method with the provided payment_method_id " +
                     "does not exist.");
                 return false;
             }
 
-            if (!IsAdminIdExists(admin_id))
+            if (!IsAdminIdExists(order.AdminId))
             {
                 Console.WriteLine("Error: Admin with the provided admin_id does not exist.");
                 return false;
             }
 
-            if (!IsCustomerIdExists(customer_id))
+            if (!IsCustomerIdExists(order.CustomerId))
             {
                 Console.WriteLine("Error: Customer with the provided customer_id does not exist.");
                 return false;
@@ -135,11 +134,11 @@ namespace BookStore.Models
                     "admin_id, customer_id) VALUES (@status, @order_date, @payment_method_id, " +
                     "@admin_id, @customer_id)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@status", status);
-                command.Parameters.AddWithValue("@order_date", order_date);
-                command.Parameters.AddWithValue("@payment_method_id", payment_method_id);
-                command.Parameters.AddWithValue("@admin_id", admin_id);
-                command.Parameters.AddWithValue("@customer_id", customer_id);
+                command.Parameters.AddWithValue("@status", order.Status);
+                command.Parameters.AddWithValue("@order_date", order.OrderDate);
+                command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
+                command.Parameters.AddWithValue("@admin_id", order.AdminId);
+                command.Parameters.AddWithValue("@customer_id", order.CustomerId);
 
                 try
                 {
@@ -155,23 +154,22 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateOrder(int id, string status, DateTime order_date, int payment_method_id, 
-            int admin_id, int customer_id)
+        public bool UpdateOrder(int id, Order order)
         {
-            if (!IsPaymentMethodIdExists(payment_method_id))
+            if (!IsPaymentMethodIdExists(order.PaymentMethodId))
             {
                 Console.WriteLine("Error: Payment method with the provided payment_method_id " +
                     "does not exist.");
                 return false;
             }
 
-            if (!IsAdminIdExists(admin_id))
+            if (!IsAdminIdExists(order.AdminId))
             {
                 Console.WriteLine("Error: Admin with the provided admin_id does not exist.");
                 return false;
             }
 
-            if (!IsCustomerIdExists(customer_id))
+            if (!IsCustomerIdExists(order.CustomerId))
             {
                 Console.WriteLine("Error: Customer with the provided customer_id does not exist.");
                 return false;
@@ -181,13 +179,13 @@ namespace BookStore.Models
             {
                 string query = "UPDATE orders SET status = @status, order_date = @order_date, " +
                     "payment_method_id = @payment_method_id, admin_id = @admin_id, " +
-                    "customer_id = @customer_id, WHERE id = @id";
+                    "customer_id = @customer_id WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@status", status);
-                command.Parameters.AddWithValue("@order_date", order_date);
-                command.Parameters.AddWithValue("@payment_method_id", payment_method_id);
-                command.Parameters.AddWithValue("@admin_id", admin_id);
-                command.Parameters.AddWithValue("@customer_id", customer_id);
+                command.Parameters.AddWithValue("@status", order.Status);
+                command.Parameters.AddWithValue("@order_date", order.OrderDate);
+                command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
+                command.Parameters.AddWithValue("@admin_id", order.AdminId);
+                command.Parameters.AddWithValue("@customer_id", order.CustomerId);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

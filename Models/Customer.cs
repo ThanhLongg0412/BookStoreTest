@@ -111,10 +111,9 @@ namespace BookStore.Models
             return customer;
         }
 
-        public bool AddCustomer(string username, string password, string email, 
-            string full_name, string phone_number, string address)
+        public bool AddCustomer(Customer customer)
         {
-            if (IsCustomerExists(username, email, phone_number))
+            if (IsCustomerExists(customer.Username, customer.Email, customer.PhoneNumber))
             {
                 Console.WriteLine("Error: Customer with the same username or email or " +
                     "phone_number already exists.");
@@ -127,12 +126,12 @@ namespace BookStore.Models
                     "phone_number, address) VALUES (@username, @password, @email, @full_name, " +
                     "@phone_number, @address)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@full_name", full_name);
-                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(phone_number) ? DBNull.Value : (object)phone_number);
-                command.Parameters.AddWithValue("@address", address);
+                command.Parameters.AddWithValue("@username", customer.Username);
+                command.Parameters.AddWithValue("@password", customer.Password);
+                command.Parameters.AddWithValue("@email", customer.Email);
+                command.Parameters.AddWithValue("@full_name", customer.FullName);
+                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(customer.PhoneNumber) ? DBNull.Value : (object)customer.PhoneNumber);
+                command.Parameters.AddWithValue("@address", customer.Address);
 
                 try
                 {
@@ -148,10 +147,9 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateCustomer(int id, string username, string password, string email,
-            string full_name, string phone_number, string address)
+        public bool UpdateCustomer(int id, Customer customer)
         {
-            if (IsCustomerExists(username, email, phone_number))
+            if (IsCustomerExists(customer.Username, customer.Email, customer.PhoneNumber))
             {
                 Console.WriteLine("Error: Customer with the same username or email or " +
                     "phone_number already exists.");
@@ -164,12 +162,12 @@ namespace BookStore.Models
                     "password = @password, email = @email, full_name = @full_name, " +
                     "phone_number = @phone_number, address = @address WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@full_name", full_name);
-                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(phone_number) ? DBNull.Value : (object)phone_number);
-                command.Parameters.AddWithValue("@address", address);
+                command.Parameters.AddWithValue("@username", customer.Username);
+                command.Parameters.AddWithValue("@password", customer.Password);
+                command.Parameters.AddWithValue("@email", customer.Email);
+                command.Parameters.AddWithValue("@full_name", customer.FullName);
+                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(customer.PhoneNumber) ? DBNull.Value : (object)customer.PhoneNumber);
+                command.Parameters.AddWithValue("@address", customer.Address);
                 command.Parameters.AddWithValue("@id", id);
 
                 try
@@ -212,8 +210,8 @@ namespace BookStore.Models
         {
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT COUNT(*) FROM customers WHERE username = @username OR " +
-                    "email = @email OR phone_number = @phone_number";
+                string query = "SELECT COUNT(*) FROM customers WHERE username = @username AND " +
+                    "email = @email AND phone_number = @phone_number";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@email", email);

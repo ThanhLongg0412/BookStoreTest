@@ -40,35 +40,34 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddOrder([FromBody] string status, [FromBody] DateTime order_date,
-            [FromBody] int payment_method_id, [FromBody] int admin_id, [FromBody] int customer_id)
+        public IActionResult AddOrder([FromBody] Order order)
         {
-            if (string.IsNullOrEmpty(status))
+            if (string.IsNullOrEmpty(order.Status))
             {
                 return BadRequest("Order status is required.");
             }
 
-            if (order_date == default)
+            if (order.OrderDate == default)
             {
                 return BadRequest("Order date is required.");
             }
 
-            if (payment_method_id == 0)
+            if (order.PaymentMethodId == 0)
             {
                 return BadRequest("Order payment method id is required.");
             }
 
-            if (admin_id == 0)
+            if (order.AdminId == 0)
             {
                 return BadRequest("Order admin id is required.");
             }
 
-            if (customer_id == 0)
+            if (order.CustomerId == 0)
             {
                 return BadRequest("Order customer id is required.");
             }
 
-            if (_orderModel.AddOrder(status, order_date, payment_method_id, admin_id, customer_id))
+            if (_orderModel.AddOrder(order))
             {
                 return Ok("Order added successfully.");
             }
@@ -79,37 +78,39 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateOrder(int id, [FromBody] string status, 
-            [FromBody] DateTime order_date, [FromBody] int payment_method_id, 
-            [FromBody] int admin_id, [FromBody] int customer_id)
+        public IActionResult UpdateOrder(int id, [FromBody] Order order)
         {
-            if (string.IsNullOrEmpty(status))
+            if (id <= 0)
+            {
+                return BadRequest("Invalid order ID.");
+            }
+
+            if (string.IsNullOrEmpty(order.Status))
             {
                 return BadRequest("Order status is required.");
             }
 
-            if (order_date == default)
+            if (order.OrderDate == default)
             {
                 return BadRequest("Order date is required.");
             }
 
-            if (payment_method_id == 0)
+            if (order.PaymentMethodId == 0)
             {
                 return BadRequest("Order payment method id is required.");
             }
 
-            if (admin_id == 0)
+            if (order.AdminId == 0)
             {
                 return BadRequest("Order admin id is required.");
             }
 
-            if (customer_id == 0)
+            if (order.CustomerId == 0)
             {
                 return BadRequest("Order customer id is required.");
             }
 
-            if (_orderModel.UpdateOrder(id, status, order_date, payment_method_id, admin_id, 
-                customer_id))
+            if (_orderModel.UpdateOrder(id, order))
             {
                 return Ok("Order updated successfully.");
             }

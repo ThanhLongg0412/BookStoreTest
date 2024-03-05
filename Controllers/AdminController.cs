@@ -40,35 +40,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAdmin([FromBody] string username, [FromBody] string password,
-            [FromBody] string email, [FromBody] string full_name, [FromBody] int role_id)
+        public IActionResult AddAdmin([FromBody] Admin admin)
         {
-            if (string.IsNullOrEmpty(username))
+            if (admin == null)
             {
-                return BadRequest("Admin username is required.");
+                return BadRequest("Admin data is required.");
             }
 
-            if (string.IsNullOrEmpty(password))
-            {
-                return BadRequest("Admin password is required.");
-            }
-
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Admin email is required.");
-            }
-
-            if (string.IsNullOrEmpty(full_name))
-            {
-                return BadRequest("Admin full name is required.");
-            }
-
-            if (role_id == 0)
-            {
-                return BadRequest("Admin role id is required.");
-            }
-
-            if (_adminModel.AddAdmin(username, password, email, full_name, role_id))
+            if (_adminModel.AddAdmin(admin))
             {
                 return Ok("Admin added successfully.");
             }
@@ -79,41 +58,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateAdmin(int id, [FromBody] string username, 
-            [FromBody] string password, [FromBody] string email, [FromBody] string full_name,
-            [FromBody] int role_id)
+        public IActionResult UpdateAdmin(int id, [FromBody] Admin admin)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid admin ID.");
             }
 
-            if (string.IsNullOrEmpty(username))
+            if (admin == null)
             {
-                return BadRequest("Admin username is required.");
+                return BadRequest("Admin data is required.");
             }
 
-            if (string.IsNullOrEmpty(password))
-            {
-                return BadRequest("Admin password is required.");
-            }
-
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Admin email is required.");
-            }
-
-            if (string.IsNullOrEmpty(full_name))
-            {
-                return BadRequest("Admin full name is required.");
-            }
-
-            if (role_id == 0)
-            {
-                return BadRequest("Admin role id is required.");
-            }
-
-            if (_adminModel.UpdateAdmin(id, username, password, email, full_name, role_id))
+            if (_adminModel.UpdateAdmin(id, admin))
             {
                 return Ok("Admin updated successfully.");
             }

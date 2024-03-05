@@ -40,48 +40,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddBook([FromBody] string isbn, [FromBody] string name,
-            [FromBody] decimal price, [FromBody] string description, [FromBody] string? image_url, 
-            [FromBody] DateTime publish_year, [FromBody] string publisher, [FromBody] string author, 
-            [FromBody] int category_id)
+        public IActionResult AddBook([FromBody] Book book)
         {
-            if (string.IsNullOrEmpty(isbn))
+            if (book == null)
             {
-                return BadRequest("Book isbn is required.");
+                return BadRequest("Book data is required.");
             }
 
-            if (string.IsNullOrEmpty(name))
-            {
-                return BadRequest("Book name is required.");
-            }
-
-            if (price < 0)
-            {
-                return BadRequest("Book price is required.");
-            }
-
-            if (string.IsNullOrEmpty(description))
-            {
-                return BadRequest("Book description is required.");
-            }
-
-            if (string.IsNullOrEmpty(publisher))
-            {
-                return BadRequest("Book publisher is required.");
-            }
-
-            if (string.IsNullOrEmpty(author))
-            {
-                return BadRequest("Book author is required.");
-            }
-
-            if (category_id == 0)
-            {
-                return BadRequest("Book category id is required.");
-            }
-
-            if (_bookModel.AddBook(isbn, name, price, description, image_url, publish_year, 
-                publisher, author, category_id))
+            if (_bookModel.AddBook(book))
             {
                 return Ok("Book added successfully.");
             }
@@ -92,48 +58,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateBook(int id, [FromBody] string isbn, [FromBody] string name,
-            [FromBody] decimal price, [FromBody] string description, [FromBody] string? image_url,
-            [FromBody] DateTime publish_year, [FromBody] string publisher, [FromBody] string author,
-            [FromBody] int category_id)
+        public IActionResult UpdateBook(int id, [FromBody] Book book)
         {
-            if (string.IsNullOrEmpty(isbn))
+            if (id <= 0)
             {
-                return BadRequest("Book isbn is required.");
+                return BadRequest("Invalid book ID.");
             }
 
-            if (string.IsNullOrEmpty(name))
+            if (book == null)
             {
-                return BadRequest("Book name is required.");
+                return BadRequest("Book data is required.");
             }
 
-            if (price < 0)
-            {
-                return BadRequest("Book price is required.");
-            }
-
-            if (string.IsNullOrEmpty(description))
-            {
-                return BadRequest("Book description is required.");
-            }
-
-            if (string.IsNullOrEmpty(publisher))
-            {
-                return BadRequest("Book publisher is required.");
-            }
-
-            if (string.IsNullOrEmpty(author))
-            {
-                return BadRequest("Book author is required.");
-            }
-
-            if (category_id == 0)
-            {
-                return BadRequest("Book category id is required.");
-            }
-
-            if (_bookModel.UpdateBook(id, isbn, name, price, description, image_url, publish_year,
-                publisher, author, category_id))
+            if (_bookModel.UpdateBook(id, book))
             {
                 return Ok("Book updated successfully.");
             }

@@ -40,37 +40,16 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddCustomer([FromBody] string username, [FromBody] string password, 
-            [FromBody] string email, [FromBody] string full_name, [FromBody] string phone_number, 
-            [FromBody] string address)
+        public IActionResult AddCustomer([FromBody] Customer customer)
         {
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(customer.Username) || string.IsNullOrEmpty(customer.Password)
+                || string.IsNullOrEmpty(customer.Email) || string.IsNullOrEmpty(customer.FullName)
+                || string.IsNullOrEmpty(customer.Address))
             {
-                return BadRequest("Customer username is required.");
+                return BadRequest("Customer information is incomplete.");
             }
 
-            if (string.IsNullOrEmpty(password))
-            {
-                return BadRequest("Customer password is required.");
-            }
-
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Customer email is required.");
-            }
-
-            if (string.IsNullOrEmpty(full_name))
-            {
-                return BadRequest("Customer full name is required.");
-            }
-
-            if (string.IsNullOrEmpty(address))
-            {
-                return BadRequest("Customer address is required.");
-            }
-
-            if (_customerModel.AddCustomer(username, password, email, full_name, phone_number, 
-                address))
+            if (_customerModel.AddCustomer(customer))
             {
                 return Ok("Customer added successfully.");
             }
@@ -81,42 +60,21 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateCustomer(int id, [FromBody] string username, 
-            [FromBody] string password, [FromBody] string email, [FromBody] string full_name, 
-            [FromBody] string phone_number, [FromBody] string address)
+        public IActionResult UpdateCustomer(int id, [FromBody] Customer customer)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid customer ID.");
             }
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(customer.Username) || string.IsNullOrEmpty(customer.Password)
+                || string.IsNullOrEmpty(customer.Email) || string.IsNullOrEmpty(customer.FullName)
+                || string.IsNullOrEmpty(customer.Address))
             {
-                return BadRequest("Customer username is required.");
+                return BadRequest("Customer information is incomplete.");
             }
 
-            if (string.IsNullOrEmpty(password))
-            {
-                return BadRequest("Customer password is required.");
-            }
-
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest("Customer email is required.");
-            }
-
-            if (string.IsNullOrEmpty(full_name))
-            {
-                return BadRequest("Customer full name is required.");
-            }
-
-            if (string.IsNullOrEmpty(address))
-            {
-                return BadRequest("Customer address is required.");
-            }
-
-            if (_customerModel.UpdateCustomer(id, username, password, email, full_name, 
-                phone_number, address))
+            if (_customerModel.UpdateCustomer(id, customer))
             {
                 return Ok("Customer updated successfully.");
             }

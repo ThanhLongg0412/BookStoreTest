@@ -40,14 +40,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddCategory([FromBody] string name, [FromBody] int? parent_id)
+        public IActionResult AddCategory([FromBody] Category category)
         {
-            if (string.IsNullOrEmpty(name))
+            if (category == null)
             {
-                return BadRequest("Category name is required.");
+                return BadRequest("Category data is required.");
             }
 
-            if (_categoryModel.AddCategory(name, parent_id))
+            if (_categoryModel.AddCategory(category))
             {
                 return Ok("Category added successfully.");
             }
@@ -58,19 +58,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateCategory(int id, [FromBody] string name, [FromBody] int? parent_id)
+        public IActionResult UpdateCategory(int id, [FromBody] Category category)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid category ID.");
             }
 
-            if (string.IsNullOrEmpty(name))
+            if (category == null)
             {
-                return BadRequest("Category name is required.");
+                return BadRequest("Category data is required.");
             }
 
-            if (_categoryModel.UpdateCategory(id, name, parent_id))
+            if (_categoryModel.UpdateCategory(id, category))
             {
                 return Ok("Category updated successfully.");
             }

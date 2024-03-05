@@ -93,9 +93,9 @@ namespace BookStore.Models
             return role;
         }
 
-        public bool AddRole(string name)
+        public bool AddRole(Role role)
         {
-            if (IsRoleExists(name))
+            if (IsRoleExists(role.Name))
             {
                 Console.WriteLine("Error: Role with the same name already exists.");
                 return false;
@@ -105,7 +105,7 @@ namespace BookStore.Models
             {
                 string query = "INSERT INTO roles (name, active) VALUES (@name, @active)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@name", role.Name);
                 command.Parameters.AddWithValue("@active", true);
 
                 try
@@ -122,9 +122,9 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateRole(int id, string name, bool active)
+        public bool UpdateRole(int id, Role role)
         {
-            if (IsRoleExists(name))
+            if (IsRoleExists(role.Name))
             {
                 Console.WriteLine("Error: Role with the same name already exists.");
                 return false;
@@ -134,8 +134,8 @@ namespace BookStore.Models
             {
                 string query = "UPDATE roles SET name = @name, active = @active WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@active", active);
+                command.Parameters.AddWithValue("@name", role.Name);
+                command.Parameters.AddWithValue("@active", role.Active);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

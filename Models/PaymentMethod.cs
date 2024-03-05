@@ -88,9 +88,9 @@ namespace BookStore.Models
             return paymentMethod;
         }
 
-        public bool AddPaymentMethod(string name)
+        public bool AddPaymentMethod(PaymentMethod paymentMethod)
         {
-            if (IsPaymentMethodExists(name))
+            if (IsPaymentMethodExists(paymentMethod.Name))
             {
                 Console.WriteLine("Error: Payment method with the same name already exists.");
                 return false;
@@ -100,7 +100,7 @@ namespace BookStore.Models
             {
                 string query = "INSERT INTO payment_methods (name) VALUES (@name)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@name", paymentMethod.Name);
 
                 try
                 {
@@ -116,9 +116,9 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdatePaymentMethod(int id, string name)
+        public bool UpdatePaymentMethod(int id, PaymentMethod paymentMethod)
         {
-            if (IsPaymentMethodExists(name))
+            if (IsPaymentMethodExists(paymentMethod.Name))
             {
                 Console.WriteLine("Error: Payment method with the same name already exists.");
                 return false;
@@ -128,7 +128,7 @@ namespace BookStore.Models
             {
                 string query = "UPDATE payment_methods SET name = @name WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@name", paymentMethod.Name);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

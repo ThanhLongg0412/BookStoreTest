@@ -123,17 +123,15 @@ namespace BookStore.Models
             return book;
         }
 
-        public bool AddBook(string isbn, string name, decimal price, string description, 
-            string? image_url, DateTime publish_year, string publisher, string author, 
-            int category_id)
+        public bool AddBook(Book book)
         {
-            if (IsBookExists(isbn, name, image_url))
+            if (IsBookExists(book.Isbn, book.Name, book.ImageUrl))
             {
                 Console.WriteLine("Error: Book with the same isbn, name or image already exists.");
                 return false;
             }
 
-            if (!IsCategoryIdExists(category_id))
+            if (!IsCategoryIdExists(book.CategoryId))
             {
                 Console.WriteLine("Error: Category with the provided category_id does not exist.");
                 return false;
@@ -141,19 +139,20 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "INSERT INTO books (isbn, name, price, description, image_url" +
-                    "publish_year, publisher, author, category_id) VALUES (@isbn, @name, @price, " +
-                    "@description, @image_url, @publish_year, @publisher, @author, @category_id)";
+                string query = "INSERT INTO books (isbn, name, price, description, image_url, " +
+                    "publish_year, publisher, author, category_id) VALUES (@isbn, @name, " +
+                    "@price, @description, @image_url, @publish_year, @publisher, @author, " +
+                    "@category_id)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@isbn", isbn);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@price", price);
-                command.Parameters.AddWithValue("@description", description);
-                command.Parameters.AddWithValue("@image_url", image_url ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@publish_year", publish_year);
-                command.Parameters.AddWithValue("@publisher", publisher);
-                command.Parameters.AddWithValue("@author", author);
-                command.Parameters.AddWithValue("@category_id", category_id);
+                command.Parameters.AddWithValue("@isbn", book.Isbn);
+                command.Parameters.AddWithValue("@name", book.Name);
+                command.Parameters.AddWithValue("@price", book.Price);
+                command.Parameters.AddWithValue("@description", book.Description);
+                command.Parameters.AddWithValue("@image_url", string.IsNullOrEmpty(book.ImageUrl) ? DBNull.Value : (object)book.ImageUrl);
+                command.Parameters.AddWithValue("@publish_year", book.PublishYear);
+                command.Parameters.AddWithValue("@publisher", book.Publisher);
+                command.Parameters.AddWithValue("@author", book.Author);
+                command.Parameters.AddWithValue("@category_id", book.CategoryId);
 
                 try
                 {
@@ -169,17 +168,15 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateBook(int id, string isbn, string name, decimal price, string description, 
-            string? image_url, DateTime publish_year, string publisher, string author, 
-            int category_id)
+        public bool UpdateBook(int id, Book book)
         {
-            if (IsBookExists(isbn, name, image_url))
+            if (IsBookExists(book.Isbn, book.Name, book.ImageUrl))
             {
                 Console.WriteLine("Error: Book with the same isbn, name or image already exists.");
                 return false;
             }
 
-            if (!IsCategoryIdExists(category_id))
+            if (!IsCategoryIdExists(book.CategoryId))
             {
                 Console.WriteLine("Error: Category with the provided category_id does not exist.");
                 return false;
@@ -192,15 +189,15 @@ namespace BookStore.Models
                     "publish_year = @publish_year, publisher = @publisher, author = @author, " +
                     "category_id = @category_id WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@isbn", isbn);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@price", price);
-                command.Parameters.AddWithValue("@description", description);
-                command.Parameters.AddWithValue("@image_url", image_url ?? (object)DBNull.Value);
-                command.Parameters.AddWithValue("@publish_year", publish_year);
-                command.Parameters.AddWithValue("@publisher", publisher);
-                command.Parameters.AddWithValue("@author", author);
-                command.Parameters.AddWithValue("@category_id", category_id);
+                command.Parameters.AddWithValue("@isbn", book.Isbn);
+                command.Parameters.AddWithValue("@name", book.Name);
+                command.Parameters.AddWithValue("@price", book.Price);
+                command.Parameters.AddWithValue("@description", book.Description);
+                command.Parameters.AddWithValue("@image_url", string.IsNullOrEmpty(book.ImageUrl) ? DBNull.Value : (object)book.ImageUrl);
+                command.Parameters.AddWithValue("@publish_year", book.PublishYear);
+                command.Parameters.AddWithValue("@publisher", book.Publisher);
+                command.Parameters.AddWithValue("@author", book.Author);
+                command.Parameters.AddWithValue("@category_id", book.CategoryId);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

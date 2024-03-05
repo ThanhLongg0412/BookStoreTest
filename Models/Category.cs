@@ -93,15 +93,15 @@ namespace BookStore.Models
             return category;
         }
 
-        public bool AddCategory(string name, int? parent_id)
+        public bool AddCategory(Category category)
         {
-            if (IsCategoryNameExists(name))
+            if (IsCategoryNameExists(category.Name))
             {
                 Console.WriteLine("Error: Category with the same name already exists.");
                 return false;
             }
 
-            if (parent_id.HasValue && !IsParentIdExists(parent_id.Value))
+            if (category.ParentId.HasValue && !IsParentIdExists(category.ParentId.Value))
             {
                 Console.WriteLine("Error: Parent category does not exist.");
                 return false;
@@ -111,8 +111,8 @@ namespace BookStore.Models
             {
                 string query = "INSERT INTO categories (name, parent_id) VALUES (@name, @parent_id)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@parent_id", parent_id ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@name", category.Name);
+                command.Parameters.AddWithValue("@parent_id", category.ParentId ?? (object)DBNull.Value);
 
                 try
                 {
@@ -128,15 +128,15 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateCategory(int id, string name, int? parent_id)
+        public bool UpdateCategory(int id, Category category)
         {
-            if (IsCategoryNameExists(name))
+            if (IsCategoryNameExists(category.Name))
             {
                 Console.WriteLine("Error: Category with the same name already exists.");
                 return false;
             }
 
-            if (parent_id.HasValue && !IsParentIdExists(parent_id.Value))
+            if (category.ParentId.HasValue && !IsParentIdExists(category.ParentId.Value))
             {
                 Console.WriteLine("Error: Parent category does not exist.");
                 return false;
@@ -147,8 +147,8 @@ namespace BookStore.Models
                 string query = "UPDATE categories SET name = @name, parent_id = @parent_id " +
                     "WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@parent_id", parent_id ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@name", category.Name);
+                command.Parameters.AddWithValue("@parent_id", category.ParentId ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

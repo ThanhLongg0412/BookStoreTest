@@ -35,14 +35,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddPermission([FromBody] string name)
+        public IActionResult AddPermission([FromBody] Permission permission)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(permission.Name))
             {
                 return BadRequest("Permission name is required.");
             }
 
-            if (_permissionModel.AddPermission(name))
+            if (_permissionModel.AddPermission(permission))
             {
                 return Ok("Permission added successfully.");
             }
@@ -53,19 +53,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdatePermission(int id, [FromBody] string name, [FromBody] bool active)
+        public IActionResult UpdatePermission(int id, [FromBody] Permission permission)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid permission ID.");
             }
 
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(permission.Name))
             {
                 return BadRequest("Permission name is required.");
             }
 
-            if (_permissionModel.UpdatePermission(id, name, active))
+            if (_permissionModel.UpdatePermission(id, permission))
             {
                 return Ok("Permission updated successfully.");
             }

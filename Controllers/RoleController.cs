@@ -35,14 +35,14 @@ namespace BookStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddRole([FromBody] string name)
+        public IActionResult AddRole([FromBody] Role role)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(role.Name))
             {
                 return BadRequest("Role name is required.");
             }
 
-            if (_roleModel.AddRole(name))
+            if (_roleModel.AddRole(role))
             {
                 return Ok("Role added successfully.");
             }
@@ -53,19 +53,19 @@ namespace BookStore.Controllers
         }
 
         [HttpPut("id={id}")]
-        public IActionResult UpdateRole(int id, [FromBody] string name, [FromBody] bool active)
+        public IActionResult UpdateRole(int id, [FromBody] Role role)
         {
             if (id <= 0)
             {
                 return BadRequest("Invalid role ID.");
             }
 
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(role.Name))
             {
                 return BadRequest("Role name is required.");
             }
 
-            if (_roleModel.UpdateRole(id, name, active))
+            if (_roleModel.UpdateRole(id, role))
             {
                 return Ok("Role updated successfully.");
             }

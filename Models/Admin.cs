@@ -106,16 +106,15 @@ namespace BookStore.Models
             return admin;
         }
 
-        public bool AddAdmin(string username, string password, string email, string full_name, 
-            int role_id)
+        public bool AddAdmin(Admin admin)
         {
-            if (IsAdminExists(username, email))
+            if (IsAdminExists(admin.Username, admin.Email))
             {
                 Console.WriteLine("Error: Admin with the same username or email already exists.");
                 return false;
             }
 
-            if (!IsRoleIdExists(role_id))
+            if (!IsRoleIdExists(admin.RoleId))
             {
                 Console.WriteLine("Error: Role with the provided role_id does not exist.");
                 return false;
@@ -126,11 +125,11 @@ namespace BookStore.Models
                 string query = "INSERT INTO admins (username, password, email, full_name, " +
                     "role_id) VALUES (@username, @password, @email, @full_name, @role_id)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@full_name", full_name);
-                command.Parameters.AddWithValue("@role_id", role_id);
+                command.Parameters.AddWithValue("@username", admin.Username);
+                command.Parameters.AddWithValue("@password", admin.Password);
+                command.Parameters.AddWithValue("@email", admin.Email);
+                command.Parameters.AddWithValue("@full_name", admin.FullName);
+                command.Parameters.AddWithValue("@role_id", admin.RoleId);
 
                 try
                 {
@@ -146,16 +145,15 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdateAdmin(int id, string username, string password, string email, 
-            string full_name, int role_id)
+        public bool UpdateAdmin(int id, Admin admin)
         {
-            if (IsAdminExists(username, email))
+            if (IsAdminExists(admin.Username, admin.Email))
             {
                 Console.WriteLine("Error: Admin with the same username or email already exists.");
                 return false;
             }
 
-            if (!IsRoleIdExists(role_id))
+            if (!IsRoleIdExists(admin.RoleId))
             {
                 Console.WriteLine("Error: Role with the provided role_id does not exist.");
                 return false;
@@ -166,11 +164,11 @@ namespace BookStore.Models
                 string query = "UPDATE admins SET username = @username, password = @password, " +
                     "email = @email, full_name = @full_name, role_id = @role_id WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@username", username);
-                command.Parameters.AddWithValue("@password", password);
-                command.Parameters.AddWithValue("@email", email);
-                command.Parameters.AddWithValue("@full_name", full_name);
-                command.Parameters.AddWithValue("@role_id", role_id);
+                command.Parameters.AddWithValue("@username", admin.Username);
+                command.Parameters.AddWithValue("@password", admin.Password);
+                command.Parameters.AddWithValue("@email", admin.Email);
+                command.Parameters.AddWithValue("@full_name", admin.FullName);
+                command.Parameters.AddWithValue("@role_id", admin.RoleId);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

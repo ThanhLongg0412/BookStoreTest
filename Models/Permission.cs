@@ -93,9 +93,9 @@ namespace BookStore.Models
             return permission;
         }
 
-        public bool AddPermission(string name)
+        public bool AddPermission(Permission permission)
         {
-            if (IsPermissionExists(name))
+            if (IsPermissionExists(permission.Name))
             {
                 Console.WriteLine("Error: Permission with the same name already exists.");
                 return false;
@@ -105,7 +105,7 @@ namespace BookStore.Models
             {
                 string query = "INSERT INTO permissions (name, active) VALUES (@name, @active)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
+                command.Parameters.AddWithValue("@name", permission.Name);
                 command.Parameters.AddWithValue("@active", true);
 
                 try
@@ -122,9 +122,9 @@ namespace BookStore.Models
             }
         }
 
-        public bool UpdatePermission(int id, string name, bool active)
+        public bool UpdatePermission(int id, Permission permission)
         {
-            if (IsPermissionExists(name))
+            if (IsPermissionExists(permission.Name))
             {
                 Console.WriteLine("Error: Permission with the same name already exists.");
                 return false;
@@ -134,8 +134,8 @@ namespace BookStore.Models
             {
                 string query = "UPDATE permissions SET name = @name, active = @active WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@name", name);
-                command.Parameters.AddWithValue("@active", active);
+                command.Parameters.AddWithValue("@name", permission.Name);
+                command.Parameters.AddWithValue("@active", permission.Active);
                 command.Parameters.AddWithValue("@id", id);
 
                 try
