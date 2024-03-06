@@ -21,6 +21,12 @@ namespace BookStore.Models
         public string AdminName { get; set; }
 
         public string CustomerName { get; set; }
+
+        public string CustomerEmail { get; set; }
+
+        public string? CustomerPhone { get; set; }
+
+        public string CustomerAddress { get; set; }
     }
 
     public class OrderModel
@@ -43,8 +49,15 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, status, order_date, payment_method_id, admin_id, " +
-                    "customer_id FROM orders";
+                string query = "SELECT orders.id, orders.status, orders.order_date, " +
+                    "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
+                    "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
+                    "customers.full_name AS customer_name, customers.email AS customer_email, " +
+                    "customers.phone AS customer_phone, customers.address AS customer_address " +
+                    "FROM orders INNER JOIN payment_methods ON " +
+                    "orders.payment_method_id = payment_methods.id INNER JOIN admins ON " +
+                    "orders.admin_id = admins.id INNER JOIN customers ON " +
+                    "orders.customer_id = customers.id";
                 SqlCommand command = new SqlCommand(query, connection);
 
                 try
@@ -60,7 +73,13 @@ namespace BookStore.Models
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
                             PaymentMethodId = (int)reader["payment_method_id"],
                             AdminId = (int)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"]
+                            CustomerId = (int)reader["customer_id"],
+                            PaymentMethodName = reader["payment_name"].ToString(),
+                            AdminName = reader["admin_name"].ToString(),
+                            CustomerName = reader["customer_name"].ToString(),
+                            CustomerEmail = reader["customer_email"].ToString(),
+                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["phone_number"].ToString(),
+                            CustomerAddress = reader["customer_address"].ToString()
                         };
                         orders.Add(order);
                     }
@@ -81,8 +100,15 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, status, order_date, payment_method_id, admin_id, " +
-                    "customer_id FROM orders WHERE id = @id";
+                string query = "SELECT orders.id, orders.status, orders.order_date, " +
+                    "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
+                    "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
+                    "customers.full_name AS customer_name, customers.email AS customer_email, " +
+                    "customers.phone AS customer_phone, customers.address AS customer_address " +
+                    "FROM orders INNER JOIN payment_methods ON " +
+                    "orders.payment_method_id = payment_methods.id INNER JOIN admins ON " +
+                    "orders.admin_id = admins.id INNER JOIN customers ON " +
+                    "orders.customer_id = customers.id WHERE orders.id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -99,7 +125,13 @@ namespace BookStore.Models
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
                             PaymentMethodId = (int)reader["payment_method_id"],
                             AdminId = (int)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"]
+                            CustomerId = (int)reader["customer_id"],
+                            PaymentMethodName = reader["payment_name"].ToString(),
+                            AdminName = reader["admin_name"].ToString(),
+                            CustomerName = reader["customer_name"].ToString(),
+                            CustomerEmail = reader["customer_email"].ToString(),
+                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["phone_number"].ToString(),
+                            CustomerAddress = reader["customer_address"].ToString()
                         };
                     }
                     reader.Close();
