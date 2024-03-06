@@ -92,7 +92,7 @@ namespace BookStore.Models
                         customer = new Customer
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Username = reader["name"].ToString(),
+                            Username = reader["username"].ToString(),
                             Password = reader["password"].ToString(),
                             Email = reader["email"].ToString(),
                             FullName = reader["full_name"].ToString(),
