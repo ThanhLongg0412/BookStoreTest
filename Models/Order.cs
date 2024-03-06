@@ -15,6 +15,12 @@ namespace BookStore.Models
         public int AdminId { get; set; }
 
         public int CustomerId { get; set; }
+
+        public string PaymentMethodName { get; set; }
+
+        public string AdminName { get; set; }
+
+        public string CustomerName { get; set; }
     }
 
     public class OrderModel

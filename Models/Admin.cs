@@ -15,6 +15,10 @@ namespace BookStore.Models
         public string FullName { get; set; }
 
         public int RoleId { get; set; }
+
+        public string RoleName { get; set; }
+
+        public bool RoleActive { get; set; }
     }
 
     public class AdminModel
@@ -37,7 +41,10 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, username, password, email, full_name, role_id FROM admins";
+                string query = "SELECT admins.id, admins.username, admins.password, " +
+                    "admins.email, admins.full_name, admins.role_id, roles.name AS role_name, " +
+                    "roles.active AS role_active FROM admins INNER JOIN roles ON " +
+                    "admins.role_id = roles.id";
                 SqlCommand command = new SqlCommand(query, connection);
 
                 try
@@ -53,7 +60,9 @@ namespace BookStore.Models
                             Password = reader["password"].ToString(),
                             Email = reader["email"].ToString(),
                             FullName = reader["full_name"].ToString(),
-                            RoleId = (int)reader["role_id"]
+                            RoleId = (int)reader["role_id"],
+                            RoleName = reader["role_name"].ToString(),
+                            RoleActive = Convert.ToBoolean(reader["role_active"])
                         };
                         admins.Add(admin);
                     }
@@ -74,8 +83,10 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, username, password, email, full_name, role_id " +
-                    "FROM admins WHERE id = @id";
+                string query = "SELECT admins.id, admins.username, admins.password, " +
+                    "admins.email, admins.full_name, admins.role_id, roles.name AS role_name, " +
+                    "roles.active AS role_active FROM admins INNER JOIN roles ON " +
+                    "admins.role_id = roles.id WHERE admins.id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -92,7 +103,9 @@ namespace BookStore.Models
                             Password = reader["password"].ToString(),
                             Email = reader["email"].ToString(),
                             FullName = reader["full_name"].ToString(),
-                            RoleId = (int)reader["role_id"]
+                            RoleId = (int)reader["role_id"],
+                            RoleName = reader["role_name"].ToString(),
+                            RoleActive = Convert.ToBoolean(reader["role_active"])
                         };
                     }
                     reader.Close();

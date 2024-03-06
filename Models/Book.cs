@@ -92,8 +92,11 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, isbn, name, price, description, image_url, " +
-                    "publish_year, publisher, author, category_id FROM books WHERE id = @id";
+                string query = "SELECT books.id, books.isbn, books.name, books.price, " +
+                    "books.description, books.image_url, books.publish_year, books.publisher, " +
+                    "books.author, books.category_id, categories.name AS category_name " +
+                    "FROM books INNER JOIN categories ON books.category_id = categories.id " +
+                    "WHERE books.id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -114,7 +117,8 @@ namespace BookStore.Models
                             PublishYear = Convert.ToDateTime(reader["publish_year"]),
                             Publisher = reader["publisher"].ToString(),
                             Author = reader["author"].ToString(),
-                            CategoryId = (int)reader["category_id"]
+                            CategoryId = (int)reader["category_id"],
+                            CategoryName = reader["category_name"].ToString()
                         };
                     }
                     reader.Close();
