@@ -7,8 +7,6 @@ namespace BookStore.Models
         public int Id { get; set; }
 
         public string Name { get; set; }
-
-        public bool Active { get; set; }
     }
 
     public class RoleModel
@@ -31,7 +29,7 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, name, active FROM roles";
+                string query = "SELECT id, name FROM roles";
                 SqlCommand command = new SqlCommand(query, connection);
 
                 try
@@ -43,8 +41,7 @@ namespace BookStore.Models
                         Role role = new Role
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Name = reader["name"].ToString(),
-                            Active = Convert.ToBoolean(reader["active"])
+                            Name = reader["name"].ToString()
                         };
                         roles.Add(role);
                     }
@@ -65,7 +62,7 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, name, active FROM roles WHERE id = @id";
+                string query = "SELECT id, name FROM roles WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -78,8 +75,7 @@ namespace BookStore.Models
                         role = new Role
                         {
                             Id = Convert.ToInt32(reader["id"]),
-                            Name = reader["name"].ToString(),
-                            Active = Convert.ToBoolean(reader["active"])
+                            Name = reader["name"].ToString()
                         };
                     }
                     reader.Close();
@@ -103,10 +99,9 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "INSERT INTO roles (name, active) VALUES (@name, @active)";
+                string query = "INSERT INTO roles (name) VALUES (@name)";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@name", role.Name);
-                command.Parameters.AddWithValue("@active", true);
 
                 try
                 {
@@ -132,10 +127,9 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "UPDATE roles SET name = @name, active = @active WHERE id = @id";
+                string query = "UPDATE roles SET name = @name WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@name", role.Name);
-                command.Parameters.AddWithValue("@active", role.Active);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

@@ -18,9 +18,9 @@ namespace BookStore.Models
 
         public int PaymentMethodId { get; set; }
 
-        public int AdminId { get; set; }
+        public int? AdminId { get; set; }
 
-        public int CustomerId { get; set; }
+        public int? CustomerId { get; set; }
 
         public string PaymentMethodName { get; set; }
 
@@ -82,8 +82,8 @@ namespace BookStore.Models
                             Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
                             PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
-                            AdminId = (int)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"],
+                            AdminId = (int)reader["admin_id"] is DBNull ? null : (int?)reader["admin_id"],
+                            CustomerId = (int)reader["customer_id"] is DBNull ? null : (int?)reader["customer_id"],
                             PaymentMethodName = reader["payment_name"].ToString(),
                             AdminName = reader["admin_name"].ToString(),
                             CustomerName = reader["customer_name"].ToString(),
@@ -138,8 +138,8 @@ namespace BookStore.Models
                             Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
                             PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
-                            AdminId = (int)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"],
+                            AdminId = (int)reader["admin_id"] is DBNull ? null : (int?)reader["admin_id"],
+                            CustomerId = (int)reader["customer_id"] is DBNull ? null : (int?)reader["customer_id"],
                             PaymentMethodName = reader["payment_name"].ToString(),
                             AdminName = reader["admin_name"].ToString(),
                             CustomerName = reader["customer_name"].ToString(),
