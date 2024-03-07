@@ -306,7 +306,7 @@ namespace BookStore.Models
             }
         }
 
-        public bool IsAdminIdExists(int admin_id)
+        public bool IsAdminIdExists(int? admin_id)
         {
             using (SqlConnection connection = GetSqlConnection())
             {
@@ -328,7 +328,7 @@ namespace BookStore.Models
             }
         }
 
-        public bool IsCustomerIdExists(int customer_id)
+        public bool IsCustomerIdExists(int? customer_id)
         {
             using (SqlConnection connection = GetSqlConnection())
             {

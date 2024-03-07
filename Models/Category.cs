@@ -59,13 +59,14 @@ namespace BookStore.Models
             return categories;
         }
 
-        public Category GetCategoryById(int id)
+        public List<Category> GetCategoryById(int id)
         {
             Category category = null;
+            List<Category> categories = new List<Category>();
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, name, parent_id FROM categories WHERE id = @id";
+                string query = "SELECT id, name, parent_id FROM categories WHERE parent_id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
@@ -73,7 +74,7 @@ namespace BookStore.Models
                 {
                     connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
-                    if (reader.Read())
+                    while (reader.Read())
                     {
                         category = new Category
                         {
@@ -81,6 +82,7 @@ namespace BookStore.Models
                             Name = reader["name"].ToString(),
                             ParentId = reader["parent_id"] is DBNull ? null : (int?)reader["parent_id"]
                         };
+                        categories.Add(category);
                     }
                     reader.Close();
                 }
@@ -90,7 +92,7 @@ namespace BookStore.Models
                 }
             }
 
-            return category;
+            return categories;
         }
 
         public bool AddCategory(Category category)
@@ -98,12 +100,6 @@ namespace BookStore.Models
             if (IsCategoryNameExists(category.Name))
             {
                 Console.WriteLine("Error: Category with the same name already exists.");
-                return false;
-            }
-
-            if (category.ParentId.HasValue && !IsParentIdExists(category.ParentId.Value))
-            {
-                Console.WriteLine("Error: Parent category does not exist.");
                 return false;
             }
 
