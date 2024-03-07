@@ -10,6 +10,12 @@ namespace BookStore.Models
 
         public DateTime OrderDate { get; set; }
 
+        public string? NameCustomer { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? PhoneNumber { get; set; }
+
         public int PaymentMethodId { get; set; }
 
         public int AdminId { get; set; }
@@ -50,10 +56,11 @@ namespace BookStore.Models
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "SELECT orders.id, orders.status, orders.order_date, " +
+                    "orders.name_customer, orders.address, orders.phone_number, " +
                     "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
                     "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
                     "customers.full_name AS customer_name, customers.email AS customer_email, " +
-                    "customers.phone AS customer_phone, customers.address AS customer_address " +
+                    "customers.phone_number AS customer_phone, customers.address AS customer_address " +
                     "FROM orders INNER JOIN payment_methods ON " +
                     "orders.payment_method_id = payment_methods.id INNER JOIN admins ON " +
                     "orders.admin_id = admins.id INNER JOIN customers ON " +
@@ -71,6 +78,9 @@ namespace BookStore.Models
                             Id = Convert.ToInt32(reader["id"]),
                             Status = reader["status"].ToString(),
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
+                            NameCustomer = reader["name_customer"] is DBNull ? null : reader["name_customer"].ToString(),
+                            Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
+                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
                             AdminId = (int)reader["admin_id"],
                             CustomerId = (int)reader["customer_id"],
@@ -78,7 +88,7 @@ namespace BookStore.Models
                             AdminName = reader["admin_name"].ToString(),
                             CustomerName = reader["customer_name"].ToString(),
                             CustomerEmail = reader["customer_email"].ToString(),
-                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["phone_number"].ToString(),
+                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["customer_phone"].ToString(),
                             CustomerAddress = reader["customer_address"].ToString()
                         };
                         orders.Add(order);
@@ -101,6 +111,7 @@ namespace BookStore.Models
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "SELECT orders.id, orders.status, orders.order_date, " +
+                    "orders.name_customer, orders.address, orders.phone_number, " +
                     "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
                     "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
                     "customers.full_name AS customer_name, customers.email AS customer_email, " +
@@ -123,6 +134,9 @@ namespace BookStore.Models
                             Id = Convert.ToInt32(reader["id"]),
                             Status = reader["status"].ToString(),
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
+                            NameCustomer = reader["name_customer"] is DBNull ? null : reader["name_customer"].ToString(),
+                            Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
+                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
                             AdminId = (int)reader["admin_id"],
                             CustomerId = (int)reader["customer_id"],
@@ -130,7 +144,7 @@ namespace BookStore.Models
                             AdminName = reader["admin_name"].ToString(),
                             CustomerName = reader["customer_name"].ToString(),
                             CustomerEmail = reader["customer_email"].ToString(),
-                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["phone_number"].ToString(),
+                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["customer_phone"].ToString(),
                             CustomerAddress = reader["customer_address"].ToString()
                         };
                     }
@@ -168,12 +182,16 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "INSERT INTO orders (status, order_date, payment_method_id, " +
-                    "admin_id, customer_id) VALUES (@status, @order_date, @payment_method_id, " +
+                string query = "INSERT INTO orders (status, order_date, name_customer, address, " +
+                    "phone_number, payment_method_id, admin_id, customer_id) VALUES (@status, " +
+                    "@order_date, @name_customer, @address, @phone_number, @payment_method_id, " +
                     "@admin_id, @customer_id)";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@status", order.Status);
                 command.Parameters.AddWithValue("@order_date", order.OrderDate);
+                command.Parameters.AddWithValue("@name_customer", string.IsNullOrEmpty(order.NameCustomer) ? DBNull.Value : (object)order.NameCustomer);
+                command.Parameters.AddWithValue("@address", string.IsNullOrEmpty(order.Address) ? DBNull.Value : (object)order.Address);
+                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(order.PhoneNumber) ? DBNull.Value : (object)order.PhoneNumber);
                 command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
                 command.Parameters.AddWithValue("@admin_id", order.AdminId);
                 command.Parameters.AddWithValue("@customer_id", order.CustomerId);
@@ -216,11 +234,15 @@ namespace BookStore.Models
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "UPDATE orders SET status = @status, order_date = @order_date, " +
-                    "payment_method_id = @payment_method_id, admin_id = @admin_id, " +
-                    "customer_id = @customer_id WHERE id = @id";
+                    "name_customer = @name_customer, address = @address, " +
+                    "phone_number = @phone_number, payment_method_id = @payment_method_id, " +
+                    "admin_id = @admin_id, customer_id = @customer_id WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@status", order.Status);
                 command.Parameters.AddWithValue("@order_date", order.OrderDate);
+                command.Parameters.AddWithValue("@name_customer", string.IsNullOrEmpty(order.NameCustomer) ? DBNull.Value : (object)order.NameCustomer);
+                command.Parameters.AddWithValue("@address", string.IsNullOrEmpty(order.Address) ? DBNull.Value : (object)order.Address);
+                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(order.PhoneNumber) ? DBNull.Value : (object)order.PhoneNumber);
                 command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
                 command.Parameters.AddWithValue("@admin_id", order.AdminId);
                 command.Parameters.AddWithValue("@customer_id", order.CustomerId);
