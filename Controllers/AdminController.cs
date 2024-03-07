@@ -97,5 +97,17 @@ namespace BookStore.Controllers
                 return BadRequest("Failed to delete admin.");
             }
         }
+
+        [HttpGet("search")]
+        public IActionResult SearchAdmins(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return BadRequest("Keyword cannot be empty");
+            }
+
+            var admins = _adminModel.SearchAdmins(keyword);
+            return Ok(admins);
+        }
     }
 }

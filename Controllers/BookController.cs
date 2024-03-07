@@ -97,5 +97,17 @@ namespace BookStore.Controllers
                 return BadRequest("Failed to delete book.");
             }
         }
+
+        [HttpGet("search")]
+        public IActionResult SearchBooks(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return BadRequest("Keyword cannot be empty");
+            }
+
+            var books = _bookModel.SearchBooks(keyword);
+            return Ok(books);
+        }
     }
 }

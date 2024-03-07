@@ -16,7 +16,7 @@ namespace BookStore.Models
 
         public string? ImageUrl { get; set; }
 
-        public DateTime PublishYear { get; set; }
+        public string PublishYear { get; set; }
 
         public string Publisher { get; set; }
 
@@ -67,7 +67,7 @@ namespace BookStore.Models
                             Price = (decimal)reader["price"],
                             Description = reader["description"].ToString(),
                             ImageUrl = reader["image_url"] is DBNull ? null : reader["image_url"].ToString(),
-                            PublishYear = Convert.ToDateTime(reader["publish_year"]),
+                            PublishYear = reader["publish_year"].ToString(),
                             Publisher = reader["publisher"].ToString(),
                             Author = reader["author"].ToString(),
                             CategoryId = (int)reader["category_id"],
@@ -114,7 +114,7 @@ namespace BookStore.Models
                             Price = (decimal)reader["price"],
                             Description = reader["description"].ToString(),
                             ImageUrl = reader["image_url"] is DBNull ? null : reader["image_url"].ToString(),
-                            PublishYear = Convert.ToDateTime(reader["publish_year"]),
+                            PublishYear = reader["publish_year"].ToString(),
                             Publisher = reader["publisher"].ToString(),
                             Author = reader["author"].ToString(),
                             CategoryId = (int)reader["category_id"],
@@ -290,6 +290,54 @@ namespace BookStore.Models
                     return false;
                 }
             }
+        }
+
+        public List<Book> SearchBooks(string keyword)
+        {
+            List<Book> books = new List<Book>();
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT books.id, books.isbn, books.name, books.price, " +
+                    "books.description, books.image_url, books.publish_year, books.publisher, " +
+                    "books.author, books.category_id, categories.name AS category_name FROM " +
+                    "books INNER JOIN categories ON books.category_id = categories.id WHERE " +
+                    "isbn LIKE @keyword OR name LIKE @keyword OR author LIKE @keyword OR " +
+                    "category_name LIKE @keyword";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@keyword", "%" + keyword + "%");
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Book book = new Book
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Isbn = reader["isbn"].ToString(),
+                            Name = reader["name"].ToString(),
+                            Price = (decimal)reader["price"],
+                            Description = reader["description"].ToString(),
+                            ImageUrl = reader["image_url"] is DBNull ? null : reader["image_url"].ToString(),
+                            PublishYear = reader["publish_year"].ToString(),
+                            Publisher = reader["publisher"].ToString(),
+                            Author = reader["author"].ToString(),
+                            CategoryId = (int)reader["category_id"],
+                            CategoryName = reader["category_name"].ToString()
+                        };
+                        books.Add(book);
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return books;
         }
     }
 }

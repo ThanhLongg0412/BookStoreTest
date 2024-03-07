@@ -97,5 +97,17 @@ namespace BookStore.Controllers
                 return BadRequest("Failed to delete payment method.");
             }
         }
+
+        [HttpGet("search")]
+        public IActionResult SearchPaymentMethods(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return BadRequest("Keyword cannot be empty");
+            }
+
+            var paymentMethods = _paymentModel.SearchPaymentMethods(keyword);
+            return Ok(paymentMethods);
+        }
     }
 }

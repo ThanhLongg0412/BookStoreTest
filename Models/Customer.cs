@@ -230,5 +230,46 @@ namespace BookStore.Models
                 }
             }
         }
+
+        public List<Customer> SearchCustomers(string keyword)
+        {
+            List<Customer> customers = new List<Customer>();
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, username, password, email, full_name, " +
+                    "phone_number, address FROM customers WHERE full_name LIKE @keyword OR " +
+                    "username LIKE @keyword OR phone_number LIKE @keyword";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@keyword", "%" + keyword + "%");
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Customer customer = new Customer
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Username = reader["username"].ToString(),
+                            Password = reader["password"].ToString(),
+                            Email = reader["email"].ToString(),
+                            FullName = reader["full_name"].ToString(),
+                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
+                            Address = reader["address"].ToString()
+                        };
+                        customers.Add(customer);
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return customers;
+        }
     }
 }

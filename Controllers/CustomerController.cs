@@ -101,5 +101,17 @@ namespace BookStore.Controllers
                 return BadRequest("Failed to delete customer.");
             }
         }
+
+        [HttpGet("search")]
+        public IActionResult SearchCustomers(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+            {
+                return BadRequest("Keyword cannot be empty");
+            }
+
+            var customers = _customerModel.SearchCustomers(keyword);
+            return Ok(customers);
+        }
     }
 }

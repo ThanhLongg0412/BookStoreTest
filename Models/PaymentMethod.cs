@@ -188,5 +188,39 @@ namespace BookStore.Models
                 }
             }
         }
+
+        public List<PaymentMethod> SearchPaymentMethods(string keyword)
+        {
+            List<PaymentMethod> paymentMethods = new List<PaymentMethod>();
+
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, name FROM payment_methods WHERE name LIKE @keyword";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@keyword", "%" + keyword + "%");
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        PaymentMethod paymentMethod = new PaymentMethod
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Name = reader["name"].ToString()
+                        };
+                        paymentMethods.Add(paymentMethod);
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return paymentMethods;
+        }
     }
 }
