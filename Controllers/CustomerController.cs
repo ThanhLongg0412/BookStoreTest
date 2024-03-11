@@ -8,10 +8,12 @@ namespace BookStore.Controllers
     public class CustomerController : ControllerBase
     {
         private readonly CustomerModel _customerModel;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CustomerController(IConfiguration configuration)
+        public CustomerController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _customerModel = new CustomerModel(configuration);
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet]
@@ -112,6 +114,65 @@ namespace BookStore.Controllers
 
             var customers = _customerModel.SearchCustomers(keyword);
             return Ok(customers);
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] CustomerLoginRequest loginRequest)
+        {
+            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Username) || string.IsNullOrEmpty(loginRequest.Password))
+            {
+                return BadRequest("Invalid login request.");
+            }
+
+            var customer = _customerModel.ValidateCustomerCredentials(loginRequest.Username, loginRequest.Password);
+
+            if (customer != null)
+            {
+                // Store admin information in session
+                _httpContextAccessor.HttpContext.Session.SetString("CustomerUsername", customer.Username);
+                _httpContextAccessor.HttpContext.Session.SetInt32("CustomerId", customer.Id);
+
+                return Ok(new { success = true, redirectUrl = "/customer/redirect" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, errorMessage = "Invalid username or password" });
+            }
+        }
+
+        [HttpGet("logout")]
+        public IActionResult Logout()
+        {
+            // Clear admin information from session
+            _httpContextAccessor.HttpContext.Session.Remove("CustomerUsername");
+            _httpContextAccessor.HttpContext.Session.Remove("CustomerId");
+
+            return Ok(new { success = true, redirectUrl = "/customer/login" });
+        }
+
+        [HttpGet("redirect")]
+        public IActionResult RedirectCustomer()
+        {
+            if (IsCustomerLoggedIn())
+            {
+                // Admin is logged in, you can redirect to the admin dashboard or perform other actions
+                return Ok("Customer is logged in.");
+            }
+            else
+            {
+                return Unauthorized("Customer is not logged in.");
+            }
+        }
+
+        private bool IsCustomerLoggedIn()
+        {
+            return _httpContextAccessor.HttpContext.Session.GetInt32("CustomerId").HasValue;
+        }
+
+        public class CustomerLoginRequest
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
         }
     }
 }

@@ -23,14 +23,14 @@ namespace BookStore.Controllers
                 return BadRequest("Invalid username or password.");
             }
 
-            var login = _loginModel.Login(loginRequest);
+            var admin = _loginModel.Login(loginRequest);
 
-            if (login == null)
+            if (admin == null)
             {
-                return Unauthorized("Invalid username or password.");
+                return Unauthorized("Invalid username or password!");
             }
 
-            return Ok(new { login.Username, login.Password });
+            return Redirect("/dashboard");
         }
     }
 }

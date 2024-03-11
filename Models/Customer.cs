@@ -271,5 +271,40 @@ namespace BookStore.Models
 
             return customers;
         }
+
+        public Customer ValidateCustomerCredentials(string username, string password)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, username, password FROM customers WHERE username = @username AND password = @password";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@username", username);
+                command.Parameters.AddWithValue("@password", password);
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        Customer customer = new Customer
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Username = reader["username"].ToString(),
+                            // You may choose not to retrieve the password here for security reasons
+                            // Password should not be stored in the session or returned in any response
+                        };
+                        return customer;
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return null;
+        }
     }
 }

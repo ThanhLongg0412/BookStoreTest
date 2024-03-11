@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Data.SqlClient;
 
 namespace BookStore.Models
 {
@@ -302,6 +303,41 @@ namespace BookStore.Models
             }
 
             return admins;
+        }
+
+        public Admin ValidateAdminCredentials(string username, string password)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "SELECT id, username, password FROM admins WHERE username = @username AND password = @password";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@username", username);
+                command.Parameters.AddWithValue("@password", password);
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        Admin admin = new Admin
+                        {
+                            Id = Convert.ToInt32(reader["id"]),
+                            Username = reader["username"].ToString(),
+                            // You may choose not to retrieve the password here for security reasons
+                            // Password should not be stored in the session or returned in any response
+                        };
+                        return admin;
+                    }
+                    reader.Close();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+
+            return null;
         }
     }
 }
