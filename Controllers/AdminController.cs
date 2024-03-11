@@ -1,4 +1,5 @@
 ﻿using BookStore.Models;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Controllers
