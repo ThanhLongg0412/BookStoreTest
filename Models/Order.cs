@@ -10,11 +10,11 @@ namespace BookStore.Models
 
         public DateTime OrderDate { get; set; }
 
-        public string? NameCustomer { get; set; }
+        public string NameCustomer { get; set; }
 
-        public string? Address { get; set; }
+        public string Address { get; set; }
 
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
 
         public int PaymentMethodId { get; set; }
 
@@ -24,15 +24,15 @@ namespace BookStore.Models
 
         public string PaymentMethodName { get; set; }
 
-        public string AdminName { get; set; }
+        public string? AdminName { get; set; }
 
-        public string CustomerName { get; set; }
+        public string? CustomerName { get; set; }
 
-        public string CustomerEmail { get; set; }
+        public string? CustomerEmail { get; set; }
 
         public string? CustomerPhone { get; set; }
 
-        public string CustomerAddress { get; set; }
+        public string? CustomerAddress { get; set; }
     }
 
     public class OrderModel
@@ -55,15 +55,13 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT orders.id, orders.status, orders.order_date, " +
-                    "orders.name_customer, orders.address, orders.phone_number, " +
-                    "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
-                    "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
+                string query = "SELECT orders.id, orders.status, orders.order_date, orders.name_customer, " +
+                    "orders.address, orders.phone_number, orders.payment_method_id, orders.admin_id, " +
+                    "orders.customer_id, payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
                     "customers.full_name AS customer_name, customers.email AS customer_email, " +
-                    "customers.phone_number AS customer_phone, customers.address AS customer_address " +
-                    "FROM orders INNER JOIN payment_methods ON " +
-                    "orders.payment_method_id = payment_methods.id INNER JOIN admins ON " +
-                    "orders.admin_id = admins.id INNER JOIN customers ON " +
+                    "customers.phone_number AS customer_phone, customers.address AS customer_address FROM " +
+                    "orders INNER JOIN payment_methods ON orders.payment_method_id = payment_methods.id " +
+                    "LEFT JOIN admins ON orders.admin_id = admins.id LEFT JOIN customers ON " +
                     "orders.customer_id = customers.id";
                 SqlCommand command = new SqlCommand(query, connection);
 
@@ -78,18 +76,18 @@ namespace BookStore.Models
                             Id = Convert.ToInt32(reader["id"]),
                             Status = reader["status"].ToString(),
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
-                            NameCustomer = reader["name_customer"] is DBNull ? null : reader["name_customer"].ToString(),
-                            Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
-                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
+                            NameCustomer = reader["name_customer"].ToString(),
+                            Address = reader["address"].ToString(),
+                            PhoneNumber = reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
-                            AdminId = (int)reader["admin_id"] is DBNull ? null : (int?)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"] is DBNull ? null : (int?)reader["customer_id"],
+                            AdminId = reader["admin_id"] != DBNull.Value ? (int)reader["admin_id"] : (int?)null,
+                            CustomerId = reader["customer_id"] != DBNull.Value ? (int)reader["customer_id"] : (int?)null,
                             PaymentMethodName = reader["payment_name"].ToString(),
-                            AdminName = reader["admin_name"].ToString(),
-                            CustomerName = reader["customer_name"].ToString(),
-                            CustomerEmail = reader["customer_email"].ToString(),
-                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["customer_phone"].ToString(),
-                            CustomerAddress = reader["customer_address"].ToString()
+                            AdminName = reader["admin_name"] != DBNull.Value ? reader["admin_name"].ToString() : null,
+                            CustomerName = reader["customer_name"] != DBNull.Value ? reader["customer_name"].ToString() : null,
+                            CustomerEmail = reader["customer_email"] != DBNull.Value ? reader["customer_email"].ToString() : null,
+                            CustomerPhone = reader["customer_phone"] != DBNull.Value ? reader["customer_phone"].ToString() : null,
+                            CustomerAddress = reader["customer_address"] != DBNull.Value ? reader["customer_address"].ToString() : null
                         };
                         orders.Add(order);
                     }
@@ -110,15 +108,13 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT orders.id, orders.status, orders.order_date, " +
-                    "orders.name_customer, orders.address, orders.phone_number, " +
-                    "orders.payment_method_id, orders.admin_id, orders.customer_id, " +
-                    "payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
+                string query = "SELECT orders.id, orders.status, orders.order_date, orders.name_customer, " +
+                    "orders.address, orders.phone_number, orders.payment_method_id, orders.admin_id, " +
+                    "orders.customer_id, payment_methods.name AS payment_name, admins.full_name AS admin_name, " +
                     "customers.full_name AS customer_name, customers.email AS customer_email, " +
-                    "customers.phone AS customer_phone, customers.address AS customer_address " +
-                    "FROM orders INNER JOIN payment_methods ON " +
-                    "orders.payment_method_id = payment_methods.id INNER JOIN admins ON " +
-                    "orders.admin_id = admins.id INNER JOIN customers ON " +
+                    "customers.phone_number AS customer_phone, customers.address AS customer_address FROM " +
+                    "orders INNER JOIN payment_methods ON orders.payment_method_id = payment_methods.id " +
+                    "LEFT JOIN admins ON orders.admin_id = admins.id LEFT JOIN customers ON " +
                     "orders.customer_id = customers.id WHERE orders.id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
@@ -134,18 +130,18 @@ namespace BookStore.Models
                             Id = Convert.ToInt32(reader["id"]),
                             Status = reader["status"].ToString(),
                             OrderDate = Convert.ToDateTime(reader["order_date"]),
-                            NameCustomer = reader["name_customer"] is DBNull ? null : reader["name_customer"].ToString(),
-                            Address = reader["address"] is DBNull ? null : reader["address"].ToString(),
-                            PhoneNumber = reader["phone_number"] is DBNull ? null : reader["phone_number"].ToString(),
+                            NameCustomer = reader["name_customer"].ToString(),
+                            Address = reader["address"].ToString(),
+                            PhoneNumber = reader["phone_number"].ToString(),
                             PaymentMethodId = (int)reader["payment_method_id"],
-                            AdminId = (int)reader["admin_id"] is DBNull ? null : (int?)reader["admin_id"],
-                            CustomerId = (int)reader["customer_id"] is DBNull ? null : (int?)reader["customer_id"],
+                            AdminId = reader["admin_id"] != DBNull.Value ? (int)reader["admin_id"] : (int?)null,
+                            CustomerId = reader["customer_id"] != DBNull.Value ? (int)reader["customer_id"] : (int?)null,
                             PaymentMethodName = reader["payment_name"].ToString(),
-                            AdminName = reader["admin_name"].ToString(),
-                            CustomerName = reader["customer_name"].ToString(),
-                            CustomerEmail = reader["customer_email"].ToString(),
-                            CustomerPhone = reader["customer_phone"] is DBNull ? null : reader["customer_phone"].ToString(),
-                            CustomerAddress = reader["customer_address"].ToString()
+                            AdminName = reader["admin_name"] != DBNull.Value ? reader["admin_name"].ToString() : null,
+                            CustomerName = reader["customer_name"] != DBNull.Value ? reader["customer_name"].ToString() : null,
+                            CustomerEmail = reader["customer_email"] != DBNull.Value ? reader["customer_email"].ToString() : null,
+                            CustomerPhone = reader["customer_phone"] != DBNull.Value ? reader["customer_phone"].ToString() : null,
+                            CustomerAddress = reader["customer_address"] != DBNull.Value ? reader["customer_address"].ToString() : null
                         };
                     }
                     reader.Close();
@@ -168,13 +164,13 @@ namespace BookStore.Models
                 return false;
             }
 
-            if (!IsAdminIdExists(order.AdminId))
+            if (order.AdminId != null && !IsAdminIdExists(order.AdminId))
             {
                 Console.WriteLine("Error: Admin with the provided admin_id does not exist.");
                 return false;
             }
 
-            if (!IsCustomerIdExists(order.CustomerId))
+            if (order.CustomerId != null && !IsCustomerIdExists(order.CustomerId))
             {
                 Console.WriteLine("Error: Customer with the provided customer_id does not exist.");
                 return false;
@@ -182,25 +178,35 @@ namespace BookStore.Models
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "INSERT INTO orders (status, order_date, name_customer, address, " +
-                    "phone_number, payment_method_id, admin_id, customer_id) VALUES (@status, " +
-                    "@order_date, @name_customer, @address, @phone_number, @payment_method_id, " +
-                    "@admin_id, @customer_id)";
+                string query = "INSERT INTO orders (status, order_date, payment_method_id, admin_id, " +
+                    "customer_id, name_customer, address, phone_number) VALUES (@status, " +
+                    "@order_date, @payment_method_id, @admin_id, @customer_id, @name_customer, " +
+                    "@address, @phone_number)";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@status", order.Status);
                 command.Parameters.AddWithValue("@order_date", order.OrderDate);
-                command.Parameters.AddWithValue("@name_customer", string.IsNullOrEmpty(order.NameCustomer) ? DBNull.Value : (object)order.NameCustomer);
-                command.Parameters.AddWithValue("@address", string.IsNullOrEmpty(order.Address) ? DBNull.Value : (object)order.Address);
-                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(order.PhoneNumber) ? DBNull.Value : (object)order.PhoneNumber);
                 command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
-                command.Parameters.AddWithValue("@admin_id", order.AdminId);
-                command.Parameters.AddWithValue("@customer_id", order.CustomerId);
+                command.Parameters.AddWithValue("@admin_id", order.AdminId != null ? order.AdminId : (object)DBNull.Value);
+                command.Parameters.AddWithValue("@customer_id", order.CustomerId != null ? order.CustomerId : (object)DBNull.Value);
+                command.Parameters.AddWithValue("@name_customer", order.NameCustomer);
+                command.Parameters.AddWithValue("@address", order.Address);
+                command.Parameters.AddWithValue("@phone_number", order.PhoneNumber);
 
                 try
                 {
                     connection.Open();
                     int rowsAffected = command.ExecuteNonQuery();
-                    return rowsAffected > 0;
+                    /*return rowsAffected > 0;*/
+                    if (rowsAffected > 0)
+                    {
+                        Console.WriteLine("Order added successfully. Rows affected: " + rowsAffected);
+                        return true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to add order. No rows affected.");
+                        return false;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -219,13 +225,13 @@ namespace BookStore.Models
                 return false;
             }
 
-            if (!IsAdminIdExists(order.AdminId))
+            if (order.AdminId != null && !IsAdminIdExists(order.AdminId))
             {
                 Console.WriteLine("Error: Admin with the provided admin_id does not exist.");
                 return false;
             }
 
-            if (!IsCustomerIdExists(order.CustomerId))
+            if (order.CustomerId != null && !IsCustomerIdExists(order.CustomerId))
             {
                 Console.WriteLine("Error: Customer with the provided customer_id does not exist.");
                 return false;
@@ -240,12 +246,12 @@ namespace BookStore.Models
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@status", order.Status);
                 command.Parameters.AddWithValue("@order_date", order.OrderDate);
-                command.Parameters.AddWithValue("@name_customer", string.IsNullOrEmpty(order.NameCustomer) ? DBNull.Value : (object)order.NameCustomer);
-                command.Parameters.AddWithValue("@address", string.IsNullOrEmpty(order.Address) ? DBNull.Value : (object)order.Address);
-                command.Parameters.AddWithValue("@phone_number", string.IsNullOrEmpty(order.PhoneNumber) ? DBNull.Value : (object)order.PhoneNumber);
                 command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
-                command.Parameters.AddWithValue("@admin_id", order.AdminId);
-                command.Parameters.AddWithValue("@customer_id", order.CustomerId);
+                command.Parameters.AddWithValue("@admin_id", order.AdminId != null ? order.AdminId : (object)DBNull.Value);
+                command.Parameters.AddWithValue("@customer_id", order.CustomerId != null ? order.CustomerId : (object)DBNull.Value);
+                command.Parameters.AddWithValue("@name_customer", order.NameCustomer);
+                command.Parameters.AddWithValue("@address", order.Address);
+                command.Parameters.AddWithValue("@phone_number", order.PhoneNumber);
                 command.Parameters.AddWithValue("@id", id);
 
                 try

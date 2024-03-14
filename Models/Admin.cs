@@ -156,7 +156,7 @@ namespace BookStore.Models
 
         public bool UpdateAdmin(int id, Admin admin)
         {
-            if (IsAdminExists(admin.Username, admin.Email))
+            if (IsAdminExists(admin.Username, admin.Email, id))
             {
                 Console.WriteLine("Error: Admin with the same username or email already exists.");
                 return false;
@@ -216,12 +216,18 @@ namespace BookStore.Models
             }
         }
 
-        public bool IsAdminExists(string username, string email)
+        public bool IsAdminExists(string username, string email, int id = -1)
         {
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "SELECT COUNT(*) FROM admins WHERE username = @username AND " +
                     "email = @email";
+
+                if (id != -1)
+                {
+                    query += "AND id != @id";
+                }
+
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@email", email);
@@ -324,8 +330,7 @@ namespace BookStore.Models
                         {
                             Id = Convert.ToInt32(reader["id"]),
                             Username = reader["username"].ToString(),
-                            // You may choose not to retrieve the password here for security reasons
-                            // Password should not be stored in the session or returned in any response
+                            
                         };
                         return admin;
                     }

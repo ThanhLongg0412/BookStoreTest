@@ -129,7 +129,7 @@ namespace BookStore.Controllers
                 _httpContextAccessor.HttpContext.Session.SetString("AdminUsername", admin.Username);
                 _httpContextAccessor.HttpContext.Session.SetInt32("AdminId", admin.Id);
 
-                return Ok(new { success = true, redirectUrl = "/admin/redirect" });
+                return Ok(new { success = true, redirectUrl = "/admin/dashboard" });
             }
             else
             {

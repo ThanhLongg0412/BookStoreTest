@@ -47,24 +47,14 @@ namespace BookStore.Controllers
                 return BadRequest("Order status is required.");
             }
 
-            if (order.OrderDate == default)
+            /*if (order.OrderDate == default)
             {
                 return BadRequest("Order date is required.");
-            }
+            }*/
 
             if (order.PaymentMethodId == 0)
             {
                 return BadRequest("Order payment method id is required.");
-            }
-
-            if (order.AdminId == 0)
-            {
-                return BadRequest("Order admin id is required.");
-            }
-
-            if (order.CustomerId == 0)
-            {
-                return BadRequest("Order customer id is required.");
             }
 
             if (_orderModel.AddOrder(order))

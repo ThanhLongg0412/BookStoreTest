@@ -179,7 +179,7 @@ namespace BookStore.Models
 
         public bool UpdateBook(int id, Book book)
         {
-            if (IsBookExists(book.Isbn, book.Name, book.ImageUrl))
+            if (IsBookExists(book.Isbn, book.Name, book.ImageUrl, id))
             {
                 Console.WriteLine("Error: Book with the same isbn, name or image already exists.");
                 return false;
@@ -245,12 +245,16 @@ namespace BookStore.Models
             }
         }
 
-        public bool IsBookExists(string isbn, string name, string? image_url)
+        public bool IsBookExists(string isbn, string name, string? image_url, int id = -1)
         {
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "SELECT COUNT(*) FROM books WHERE isbn = @isbn AND name = @name " +
                     "AND image_url = @image_url";
+                if (id != -1)
+                {
+                    query += "AND id != @id";
+                }
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@isbn", isbn);
                 command.Parameters.AddWithValue("@name", name);
