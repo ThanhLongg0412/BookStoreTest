@@ -110,6 +110,24 @@ namespace BookStore.Controllers
             }
         }
 
+        [HttpPut("idd={id}")]
+        public IActionResult BrowseOrder(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest("Invalid order ID.");
+            }
+            
+            if (_orderModel.BrowseOrder(id))
+            {
+                return Ok("Order updated successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to update order.");
+            }
+        }
+
         [HttpDelete("id={id}")]
         public IActionResult DeleteOrder(int id)
         {

@@ -268,6 +268,28 @@ namespace BookStore.Models
             }
         }
 
+        public bool BrowseOrder(int id)
+        {
+            using (SqlConnection connection = GetSqlConnection())
+            {
+                string query = "UPDATE orders SET status = status + 1 WHERE id = @id";
+                SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
+
+                try
+                {
+                    connection.Open();
+                    int rowsAffected = command.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                    return false;
+                }
+            }
+        }
+
         public bool DeleteOrder(int id)
         {
             using (SqlConnection connection = GetSqlConnection())
