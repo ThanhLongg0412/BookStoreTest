@@ -272,7 +272,8 @@ namespace BookStore.Models
         {
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "UPDATE orders SET status = status + 1 WHERE id = @id";
+                string query = "UPDATE orders SET status = CASE WHEN status < 4 THEN status + 1 ELSE status " +
+                    "END WHERE id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@id", id);
 
