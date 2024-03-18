@@ -128,8 +128,9 @@ namespace BookStore.Controllers
                 // Store admin information in session
                 _httpContextAccessor.HttpContext.Session.SetString("AdminUsername", admin.Username);
                 _httpContextAccessor.HttpContext.Session.SetInt32("AdminId", admin.Id);
+                _httpContextAccessor.HttpContext.Session.SetString("RoleName", admin.RoleName);
 
-                return Ok(new { success = true, redirectUrl = "/admin/dashboard" });
+                return Ok(new { success = true, roleName = admin.RoleName });
             }
             else
             {
@@ -144,7 +145,7 @@ namespace BookStore.Controllers
             _httpContextAccessor.HttpContext.Session.Remove("AdminUsername");
             _httpContextAccessor.HttpContext.Session.Remove("AdminId");
 
-            return Ok(new { success = true, redirectUrl = "/admin/login" });
+            return Ok(new { success = true });
         }
 
         [HttpGet("redirect")]

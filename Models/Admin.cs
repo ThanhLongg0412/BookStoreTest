@@ -315,7 +315,7 @@ namespace BookStore.Models
         {
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT id, username, password FROM admins WHERE username = @username AND password = @password";
+                string query = "SELECT admins.id, admins.username, roles.name AS roleName FROM admins INNER JOIN roles ON admins.role_id = roles.id WHERE admins.username = @username AND admins.password = @password";
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@username", username);
                 command.Parameters.AddWithValue("@password", password);
@@ -330,7 +330,8 @@ namespace BookStore.Models
                         {
                             Id = Convert.ToInt32(reader["id"]),
                             Username = reader["username"].ToString(),
-                            
+                            RoleName = reader["roleName"].ToString()
+
                         };
                         return admin;
                     }
