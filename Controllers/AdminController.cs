@@ -148,20 +148,6 @@ namespace BookStore.Controllers
             return Ok(new { success = true });
         }
 
-        [HttpGet("redirect")]
-        public IActionResult RedirectAdmin()
-        {
-            if (IsAdminLoggedIn())
-            {
-                // Admin is logged in, you can redirect to the admin dashboard or perform other actions
-                return Ok("Admin is logged in.");
-            }
-            else
-            {
-                return Unauthorized("Admin is not logged in.");
-            }
-        }
-
         private bool IsAdminLoggedIn()
         {
             return _httpContextAccessor.HttpContext.Session.GetInt32("AdminId").HasValue;
