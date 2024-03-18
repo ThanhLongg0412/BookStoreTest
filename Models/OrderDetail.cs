@@ -11,6 +11,12 @@ namespace BookStore.Models
         public decimal UnitPrice { get; set; }
 
         public int Amount { get; set; }
+
+        public string BookName { get; set; }
+
+        public decimal BookPrice { get; set; }
+
+        public string? BookImage { get; set; }
     }
 
     public class OrderDetailModel
@@ -27,14 +33,19 @@ namespace BookStore.Models
             return new SqlConnection(_configuration.GetConnectionString("bookstoreCon"));
         }
 
-        public List<OrderDetail> GetAllOrderDetails()
+        public List<OrderDetail> GetAllOrderDetails(int id)
         {
+            OrderDetail orderDetail = null;
             List<OrderDetail> orderDetails = new List<OrderDetail>();
 
             using (SqlConnection connection = GetSqlConnection())
             {
-                string query = "SELECT order_id, book_id, unit_price, amount FROM order_details";
+                string query = "SELECT order_details.order_id, order_details.book_id, order_details.unit_price, " +
+                    "order_details.amount, books.name AS book_name, books.price AS book_price, " +
+                    "books.image_url AS book_image FROM order_details INNER JOIN books ON " +
+                    "order_details.book_id = books.id WHERE order_details.order_id = @id";
                 SqlCommand command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@id", id);
 
                 try
                 {
@@ -42,12 +53,13 @@ namespace BookStore.Models
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
-                        OrderDetail orderDetail = new OrderDetail
+                        orderDetail = new OrderDetail
                         {
                             OrderId = (int)reader["order_id"],
                             BookId = (int)reader["book_id"],
                             UnitPrice = (decimal)reader["unit_price"],
-                            Amount = (int)reader["amount"]
+                            Amount = (int)reader["amount"],
+
                         };
                         orderDetails.Add(orderDetail);
                     }
