@@ -179,11 +179,10 @@ namespace BookStore.Models
             using (SqlConnection connection = GetSqlConnection())
             {
                 string query = "INSERT INTO orders (status, order_date, payment_method_id, admin_id, " +
-                    "customer_id, name_customer, address, phone_number) VALUES (@status, " +
+                    "customer_id, name_customer, address, phone_number) VALUES (1, " +
                     "@order_date, @payment_method_id, @admin_id, @customer_id, @name_customer, " +
                     "@address, @phone_number)";
                 SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue("@status", order.Status);
                 command.Parameters.AddWithValue("@order_date", order.OrderDate);
                 command.Parameters.AddWithValue("@payment_method_id", order.PaymentMethodId);
                 command.Parameters.AddWithValue("@admin_id", order.AdminId != null ? order.AdminId : (object)DBNull.Value);
